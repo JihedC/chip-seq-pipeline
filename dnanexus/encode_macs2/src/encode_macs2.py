@@ -169,21 +169,18 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end, chrom_sizes, genomesize,
                 rep1_control = pooled_controls
                 rep2_control = pooled_controls
         else:
+                rep1_control = ctl1_ta  # default.  May be changed later.
+                rep2_control = ctl2_ta  # default.  May be changed later.
+                rep1_ctl_msg = "control rep1"
+                rep2_ctl_msg = "control rep2"
                 if ntags_ctl1 < ntags_rep1:
                         logger.info("Fewer reads in control replicate 1 than experiment replicate 1.  Using pooled controls for replicate 1.")
                         rep1_control = pooled_controls
                         rep1_ctl_msg = "pooled controls"
-                elif not simplicate_experiment and ntags_ctl2 < ntags_rep2:
+                if not simplicate_experiment and ntags_ctl2 < ntags_rep2:
                         logger.info("Fewer reads in control replicate 2 than experiment replicate 2.  Using pooled controls for replicate 2.")
                         rep2_control = pooled_controls
                         rep2_ctl_msg = "pooled controls"
-                else:
-                    logger.info(
-                        "Using distinct controls for replicate 1 and 2.")
-                    rep1_control = ctl1_ta  # default.  May be changed later.
-                    rep2_control = ctl2_ta  # default.  May be changed later.
-                    rep1_ctl_msg = "control rep1"
-                    rep2_ctl_msg = "control rep2"
 
     pseudoreplicator_applet = dxpy.find_one_data_object(
         classname='applet',
