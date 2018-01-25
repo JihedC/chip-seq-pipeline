@@ -433,31 +433,6 @@ def build_workflow(experiment, biorep_n, input_shield_stage_input, accession, us
             }
         )
 
-
-    ''' This should all be done in the shield's postprocess entrypoint
-    if args.accession_outputs:
-        derived_from = input_shield_stage_input.get('reads1')
-        if reads2:
-            derived_from.append(reads2)
-        files_json = {dxpy.dxlink({'stage': mapping_stage_id, 'outputField': 'mapped_reads'}) : {
-            'notes': 'Biorep%d | Mapped to %s' %(biorep_n, input_shield_stage_input.get('reference_tar')),
-            'lab': 'j-michael-cherry',
-            'award': 'U41HG006992',
-            'submitted_by': 'jseth@stanford.edu',
-            'file_format': 'bam',
-            'output_type': 'alignments',
-            'derived_from': derived_from,
-            'dataset': experiment.get('accession')}
-        }
-        output_shield_stage_id = workflow.add_stage(
-            output_shield_applet,
-            name='Accession outputs %s rep%d' %(experiment.get('accession'), biorep_n),
-            folder=mapping_output_folder,
-            stage_input={'files': [dxpy.dxlink({'stage': mapping_stage_id, 'outputField': 'mapped_reads'})],
-                         'files_json': files_json,
-                         'key': input_shield_stage_input.get('key')}
-        )
-    '''
     return workflow
 
 
