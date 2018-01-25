@@ -422,15 +422,20 @@ def build_workflow(experiment, biorep_n, input_shield_stage_input, accession, us
         xcor_applet = find_applet_by_name(XCOR_APPLET_NAME, applet_project.get_id())
         logging.debug('Found applet %s' %(xcor_applet.name))
 
-        xcor_stage_id = workflow.add_stage(
-            xcor_applet,
-            name='Calculate cross-correlation %s rep%d' %(experiment.get('accession'), biorep_n),
-            folder=final_output_folder,
-            stage_input={
+>>>>> here we need to decide, based on PE/SE and read length, what to pass to xcor
+>>>>> if <= 50 bp SE, just pass tagAlign
+>>>>> else pass the read1 fastq
+        if reads2 
+        xcor_input = {
                 'input_bam': dxpy.dxlink({'stage': filter_qc_stage_id, 'outputField': 'filtered_bam'}),
                 'paired_end': dxpy.dxlink({'stage': filter_qc_stage_id, 'outputField': 'paired_end'}),
                 'spp_version': args.spp_version
             }
+        xcor_stage_id = workflow.add_stage(
+            xcor_applet,
+            name='Calculate cross-correlation %s rep%d' %(experiment.get('accession'), biorep_n),
+            folder=final_output_folder,
+            stage_input=xcor_input
         )
 
     return workflow
