@@ -10,42 +10,43 @@
     "inputSpec": [
         {
             "name": "paired_end",
+            "label": "Endedness for xcor",
             "class": "boolean",
             "optional": false
         },
         {
             "name": "input_bam",
-            "label": "Filtered SE BAM file",
+            "label": "Filtered SE BAM file for xcor",
             "class": "file",
             "optional": true
         },
         {
             "name": "input_tagAlign",
-            "label": "Filtered SE tagAlign file",
+            "label": "Filtered SE tagAlign file for xcor",
             "class": "file",
             "optional": true
         },
         {
             "name": "input_fastq",
-            "label": "SE or read1 fastq",
+            "label": "SE or read1 fastq for xcor",
             "class": "file",
             "optional": true
         },
         {
             "name": "reference_tar",
-            "label": "If fastq is supplied, map to this reference bwa index",
+            "label": "If fastq is supplied for xcor, map to this reference bwa index",
             "class": "file",
             "optional": true
         },
         {
           "name": "crop_length",
-          "label": "If fastq is supplied, crop all reads to this length",
+          "label": "If fastq is supplied for xcor, crop all reads to this length",
           "class": "string",
           "optional": true
         },
         {
           "name": "Nreads",
-          "label": "The number of reads to subsample",
+          "label": "The number of reads to subsample for xcor",
           "class": "int",
           "default": 15000000
         }
