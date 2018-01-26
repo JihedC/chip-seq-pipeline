@@ -334,7 +334,7 @@ def unique_se_read_length(files):
             '%s' % (pprint.pformat([(f.get('accession'), f.get('read_length')) for f in files])))
         return None
     else:
-        return read_lengths.pop()
+        return int(read_lengths.pop())
 
 
 def unique_pe_read_length(file_tuples):
@@ -345,7 +345,7 @@ def unique_pe_read_length(file_tuples):
             '%s' % (pprint.pformat([(f[i].get('accession'), f[i].get('read_length')) for i in [0,1] for f in file_tuples])))
         return None
     else:
-        return read_lengths.pop()
+        return int(read_lengths.pop())
 
 
 def build_workflow(experiment, biorep_n, input_shield_stage_input, read_length, accession, use_existing_folders):
@@ -455,7 +455,7 @@ def build_workflow(experiment, biorep_n, input_shield_stage_input, read_length, 
         # >>>>> here we need to decide, based on PE/SE and read length, what to pass to xcor
         # >>>>> if <= 50 bp SE, just pass tagAlign
         # >>>>> else pass the read1 fastq
-        if mapping_stage_input.get('reads2') or read_length > 50:
+        if mapping_stage_input.get('reads2') or (read_length > 50 and input_shield_stage_input.get('crop_length') != str(50)):
             xcor_input = {
                 'input_fastq': dxpy.dxlink({'stage': mapping_stage_id, 'inputField': 'reads1'}),
                 'reference_tar': dxpy.dxlink({'stage': mapping_stage_id, 'inputField': 'reference_tar'}),
@@ -463,7 +463,7 @@ def build_workflow(experiment, biorep_n, input_shield_stage_input, read_length, 
             }
             if read_length > 50:
                 xcor_input.update({'crop_length': str(50)})
-        else:  # single-ended read_length < 50
+        else:  # single-ended read_length <= 50
             xcor_input = {
                 'input_tagAlign': dxpy.dxlink({'stage': filter_qc_stage_id, 'outputField': 'tagAlign_file'}),
                 'paired_end': False
