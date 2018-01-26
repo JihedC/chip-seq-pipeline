@@ -52,6 +52,14 @@ REFERENCES = [
 APPLETS = {}
 
 
+class MetadataError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 def get_args():
     import argparse
     parser = argparse.ArgumentParser(
@@ -318,7 +326,29 @@ def choose_reference(experiment, biorep_n, server, keypair, sex_specific):
     return reference
 
 
-def build_workflow(experiment, biorep_n, input_shield_stage_input, accession, use_existing_folders):
+def unique_se_read_length(files):
+    read_lengths = set([f.get('read_length') for f in files])
+    if len(read_lengths) != 1:
+        logging.error(
+            'Unequal or missing read lengths in files:\n'
+            '%s' % (pprint.pformat([(f.get('accession'), f.get('read_length')) for f in files])))
+        return None
+    else:
+        return read_lengths.pop()
+
+
+def unique_pe_read_length(file_tuples):
+    read_lengths = set([f[i].get('read_length') for i in [0,1] for f in file_tuples])
+    if len(read_lengths) != 1:
+        logging.error(
+            'Unequal or missing read lengths in PE files:\n'
+            '%s' % (pprint.pformat([(f[i].get('accession'), f[i].get('read_length')) for i in [0,1] for f in file_tuples])))
+        return None
+    else:
+        return read_lengths.pop()
+
+
+def build_workflow(experiment, biorep_n, input_shield_stage_input, read_length, accession, use_existing_folders):
 
     output_project = resolve_project(args.outp, 'w')
     logging.debug('Found output project %s' % (output_project.name))
@@ -420,20 +450,28 @@ def build_workflow(experiment, biorep_n, input_shield_stage_input, accession, us
         )
 
         xcor_applet = find_applet_by_name(XCOR_APPLET_NAME, applet_project.get_id())
-        logging.debug('Found applet %s' %(xcor_applet.name))
+        logging.debug('Found applet %s' % (xcor_applet.name))
 
->>>>> here we need to decide, based on PE/SE and read length, what to pass to xcor
->>>>> if <= 50 bp SE, just pass tagAlign
->>>>> else pass the read1 fastq
-        if reads2 
-        xcor_input = {
-                'input_bam': dxpy.dxlink({'stage': filter_qc_stage_id, 'outputField': 'filtered_bam'}),
-                'paired_end': dxpy.dxlink({'stage': filter_qc_stage_id, 'outputField': 'paired_end'}),
-                'spp_version': args.spp_version
+        # >>>>> here we need to decide, based on PE/SE and read length, what to pass to xcor
+        # >>>>> if <= 50 bp SE, just pass tagAlign
+        # >>>>> else pass the read1 fastq
+        if mapping_stage_input.get('reads2') or read_length > 50:
+            xcor_input = {
+                'input_fastq': dxpy.dxlink({'stage': mapping_stage_id, 'inputField': 'reads1'}),
+                'reference_tar': dxpy.dxlink({'stage': mapping_stage_id, 'inputField': 'reference_tar'}),
+                'paired_end': False
             }
+            if read_length > 50:
+                xcor_input.update({'crop_length': str(50)})
+        else:  # single-ended read_length < 50
+            xcor_input = {
+                'input_tagAlign': dxpy.dxlink({'stage': filter_qc_stage_id, 'outputField': 'tagAlign_file'}),
+                'paired_end': False
+            }
+
         xcor_stage_id = workflow.add_stage(
             xcor_applet,
-            name='Calculate cross-correlation %s rep%d' %(experiment.get('accession'), biorep_n),
+            name='Calculate cross-correlation %s rep%d' % (experiment.get('accession'), biorep_n),
             folder=final_output_folder,
             stage_input=xcor_input
         )
@@ -441,7 +479,7 @@ def build_workflow(experiment, biorep_n, input_shield_stage_input, accession, us
     return workflow
 
 
-def map_only(experiment, biorep_n, files, server, keypair, sex_specific,
+def map_only(experiment, biorep_n, files, read_length, server, keypair, sex_specific,
              crop_length, accession, fqcheck, force_patch,
              use_existing_folders, encoded_check):
 
@@ -467,7 +505,7 @@ def map_only(experiment, biorep_n, files, server, keypair, sex_specific,
 
     if all(isinstance(f, dict) for f in files): #single end
         input_shield_stage_input.update({'reads1': [f.get('accession') for f in files]})
-        workflows.append(build_workflow(experiment, biorep_n, input_shield_stage_input, accession, use_existing_folders))
+        workflows.append(build_workflow(experiment, biorep_n, input_shield_stage_input, read_length, accession, use_existing_folders))
     elif all(isinstance(f, tuple) for f in files): #paired-end
         #launches separate mapping jobs for each readpair
         #TODO: upadte input_shield to take an array of read1/read2 PE pairs then pass that array from here
@@ -479,7 +517,7 @@ def map_only(experiment, biorep_n, files, server, keypair, sex_specific,
             except StopIteration:
                 logging.error('%s rep %s: Unmatched read pairs' %(experiment.get('accession'),biorep_n))
                 return []
-        workflows.append(build_workflow(experiment, biorep_n, input_shield_stage_input, accession, use_existing_folders))
+        workflows.append(build_workflow(experiment, biorep_n, input_shield_stage_input, read_length, accession, use_existing_folders))
     else:
         logging.error('%s: List of files to map appears to be mixed single-end and paired-end: %s' %(experiment.get('accession'), files))
 
@@ -605,16 +643,22 @@ def main():
                 if biorep_files:
                     logging.warning('%s: leftover file(s) %s' %(experiment.get('accession'), biorep_files))
                 if paired_files:
+                    pe_read_length = unique_pe_read_length(paired_files)
+                    if not unique_pe_read_length:
+                        raise MetadataError
                     pe_jobs = \
-                        map_only(experiment, biorep_n, paired_files,
+                        map_only(experiment, biorep_n, paired_files, pe_read_length,
                                  server, keypair, args.sex_specific,
                                  args.crop_length, args.accession,
                                  args.fqcheck, args.force_patch,
                                  args.use_existing_folders, args.encoded_check)
                     in_process = True
                 if unpaired_files:
+                    se_read_length = unique_se_read_length(unpaired_files)
+                    if not unique_se_read_length:
+                        raise MetadataError
                     se_jobs = \
-                        map_only(experiment, biorep_n, unpaired_files,
+                        map_only(experiment, biorep_n, unpaired_files, se_read_length,
                                  server, keypair, args.sex_specific,
                                  args.crop_length, args.accession,
                                  args.fqcheck, args.force_patch,
