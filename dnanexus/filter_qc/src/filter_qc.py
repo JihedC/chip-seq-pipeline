@@ -121,14 +121,6 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
     else:
         logger.setLevel(logging.INFO)
 
-    try:
-        subprocess.check_call("set -x; samtools --version", shell=True)
-    except:
-        pass
-    try:
-        subprocess.check_call("set -x; java -Xmx4G -jar /picard/picard.jar MarkDuplicates --version", shell=True)
-    except:
-        pass
     raw_bam_file = dxpy.DXFile(input_bam)
     raw_bam_filename = raw_bam_file.name
     raw_bam_basename = raw_bam_file.name.rstrip('.bam')
@@ -176,7 +168,9 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
             # fixmate requires name-sorted alignment; -r removes secondary and
             # unmapped (redundant here because already done above?)
             # - send sam-formatted output to stdout
-            "samtools fixmate -r -O sam %s -" % (tmp_filt_bam_filename),
+            # new syntax:
+            # "samtools fixmate -r -O sam %s -" % (tmp_filt_bam_filename),
+            "samtools fixmate -r %s -" % (tmp_filt_bam_filename),
             # repeat filtering after mate repair
             "samtools view -F 1804 -f 2 -u -",
             # produce the coordinate-sorted BAM
@@ -205,8 +199,10 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
     tmp_filt_bam_filename = raw_bam_basename + ".dupmark.bam"
     dup_file_qc_filename = raw_bam_basename + ".dup.qc"
     picard_string = ' '.join([
-        # "java -Xmx4G -jar /picard/MarkDuplicates.jar",
-        "java -Xmx4G -jar /picard/picard.jar MarkDuplicates",
+        # 1.92 syntax: 
+        "java -Xmx4G -jar /picard/MarkDuplicates.jar",
+        # new syntax
+        # "java -Xmx4G -jar /picard/picard.jar MarkDuplicates",
         "INPUT=%s" % (filt_bam_filename),
         "OUTPUT=%s" % (tmp_filt_bam_filename),
         "METRICS_FILE=%s" % (dup_file_qc_filename),
