@@ -10,7 +10,7 @@ dx mkdir -p "$project:$folder/assets/"
 
 for asset in ${ASSETS[@]}; do
 	dest="$project:$folder/assets/$asset"
-	echo $dest
-	dx build_asset --no-watch --destination "$project:$folder/assets/$asset" "$asset/" &
+	echo $dest >> $asset.log
+	dx build_asset --no-watch --destination "$project:$folder/assets/$asset" "$asset/" 1>> $asset.log 2>&1 &
 done
 
