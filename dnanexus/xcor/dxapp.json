@@ -84,11 +84,6 @@
         "file": "src/xcor.py",
         "execDepends": [],
         "assetDepends": [
-          {"name": "samtools_asset",
-           "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
-           "version": "0.0.1",
-           "folder": "/" 
-          },
           {"name": "bioconductor_asset",
            "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
            "version": "0.0.1",
