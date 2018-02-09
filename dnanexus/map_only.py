@@ -166,11 +166,6 @@ def get_args():
         default=False,
         action='store_true')
 
-    parser.add_argument(
-        '--spp_version',
-        help="Version of spp to use for the cross-correlation analysis",
-        default='1.14')
-
     parser.add_argument('--accession', help="Accession the results to the ENCODE Portal", default=False, action='store_true')
     parser.add_argument('--fqcheck', help="If --accession, check that analysis is based on latest fastqs on ENCODEd", type=t_or_f, default=None)
     parser.add_argument('--force_patch', help="Force patching metadata for existing files", type=t_or_f, default=None)

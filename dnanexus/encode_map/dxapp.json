@@ -29,6 +29,13 @@
       "default": "native"
     },
     {
+      "name": "hard_crop",
+      "label": "If true and if crop_length then discard reads less than crop_length",
+      "class": "boolean",
+      "optional": true,
+      "default": true
+    },
+    {
       "name": "reference_tar",
       "label": "Reference files for bwa",
       "patterns": ["*.tar", "*.tar.gz", "*.tgz"],

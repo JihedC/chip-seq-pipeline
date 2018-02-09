@@ -93,7 +93,7 @@ def resolve_reference(reference_tar_filename, reference_dirname):
 
 
 @dxpy.entry_point("crop")
-def crop(reads1_file, reads2_file, crop_length, debug):
+def crop(reads1_file, reads2_file, crop_length, hard_crop, debug):
 
     if debug:
         logger.setLevel(logging.DEBUG)
@@ -143,7 +143,7 @@ def crop(reads1_file, reads2_file, crop_length, debug):
             output_fwd_unpaired_filename,
             output_rev_paired_filename,
             output_rev_unpaired_filename,
-            'MINLEN:%s' % (crop_length),
+            'MINLEN:%s' % (crop_length) if hard_crop else None,
             'CROP:%s' % (crop_length)]
             if s])
 
@@ -342,7 +342,7 @@ def process(reads_file, reference_tar, bwa_aln_params, bwa_version, debug):
 
 
 @dxpy.entry_point("main")
-def main(reads1, crop_length, reference_tar,
+def main(reads1, crop_length, hard_crop, reference_tar,
          bwa_version, bwa_aln_params, samtools_version, debug, reads2=None):
 
     # Main entry-point.  Parameter defaults assumed to come from dxapp.json.
@@ -372,6 +372,7 @@ def main(reads1, crop_length, reference_tar,
             "reads1_file": reads1,
             "reads2_file": reads2,
             "crop_length": crop_length,
+            "hard_crop": hard_crop,
             "debug": debug
         }
         logger.info("Crop job input: %s" % (crop_subjob_input))
