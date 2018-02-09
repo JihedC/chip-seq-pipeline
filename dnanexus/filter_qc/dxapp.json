@@ -160,8 +160,11 @@
             "folder": "/ChIP-seq/assets/"
       },
       {
-            "id": "record-F9kjQ080kP5gfP2J3Z4y3b64"
-      }      
+            "name": "filter_qc_asset",
+            "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
+            "version": "0.0.1",
+            "folder": "/ChIP-seq/assets/"
+      },
     ]
   },
   "access": {
