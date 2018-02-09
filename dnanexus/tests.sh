@@ -189,6 +189,20 @@ dx run \
 /ChIP-seq/applets/encode_map
 
 
+# Run ENCODE_map on ENCSR502NRF rep1 PE chr19
+dx run \
+--input "reads1=E3 ChIP-seq:/test_data/TF/ENCSR502NRF-PE/ENCFF071LVJ-chr19.fastq.gz" \
+--input "reads2=E3 ChIP-seq:/test_data/TF/ENCSR502NRF-PE/ENCFF932LBZ-chr19.fastq.gz" \
+--input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GRCh38_chr21_bwa.tar.gz" \
+--verbose \
+--destination /encode_map_test/test_ENCSR502NRF_r1_chr19_$(date +"%Y%m%d%H%M") \
+--name encode_map_ENCSR502NRF_r1_chr19_$(date +"%Y%m%d%H%M") \
+--delay-workspace-destruction \
+--priority high \
+--yes \
+/ChIP-seq/applets/encode_map
+
+
 # filter_qc on ENCSR000EEB SE
 dx run \
 --input "paired_end=false" \
