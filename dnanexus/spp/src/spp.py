@@ -102,6 +102,11 @@ def main(experiment, control, xcor_scores_input, npeaks, nodups, bigbed,
     logger.info(spp_command)
     subprocess.check_call(shlex.split(spp_command))
 
+    # the run_spp.R script generates a gzipped peaks file which may have a
+    # different md5 even with identical input reads if the output filenames
+    # differ. Here we should probably gzip -dc | gzip -n to make md5-identical
+    # outputs from identical reads input irrespective of output filename
+
     # when one of the peak coordinates are an exact multiple of 10, spp (R)
     # outputs the coordinate in scientific notation
     # this changes any such coodinates to decimal notation
