@@ -2492,12 +2492,12 @@ def new_metadata(old_obj, new_obj):
         if key not in old_obj:
             return True
         elif key == 'derived_from':
-            logger.debug("%s" % (set([re.search("ENCFF.{6}", s).group(0) for s in old_obj[key]])))
-            logger.debug("%s" % (set([re.search("ENCFF.{6}", s).group(0) for s in new_obj[key]])))
+            logger.debug("%s" % (set([re.search("(ENC|TST)FF.{6}", s).group(0) for s in old_obj[key]])))
+            logger.debug("%s" % (set([re.search("(ENC|TST)FF.{6}", s).group(0) for s in new_obj[key]])))
             try:
-                if set([re.search("ENCFF.{6}", s).group(0) for s in old_obj[key]]) \
+                if set([re.search("(ENC|TST)FF.{6}", s).group(0) for s in old_obj[key]]) \
                    != \
-                   set([re.search("ENCFF.{6}", s).group(0) for s in new_obj[key]]):
+                   set([re.search("(ENC|TST)FF.{6}", s).group(0) for s in new_obj[key]]):
                     return True
             except:
                 logger.warning(
