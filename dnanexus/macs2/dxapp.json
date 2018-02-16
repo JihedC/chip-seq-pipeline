@@ -22,8 +22,8 @@
 		},
 		{
 			"name": "xcor_scores_input",
-			"label": "Cross-correlation scores file from previous pipeline step",
-			"class": "file",
+			"label": "Cross-correlation scores file(s) from previous pipeline step",
+			"class": "array:file",
 			"optional": false
 		},
 		{

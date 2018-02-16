@@ -48,22 +48,6 @@ def spp(experiment, control, xcor_scores, chrom_sizes, spp_version,
     return spp_applet.run(spp_input, name=name)
 
 
-def xcor_only(tags, paired_end, spp_version, name='xcor_only'):
-    xcor_only_applet = \
-        dxpy.find_one_data_object(
-            classname='applet',
-            name='xcor_only',
-            project=dxpy.PROJECT_CONTEXT_ID,
-            zero_ok=False,
-            more_ok=False,
-            return_handler=True)
-    return xcor_only_applet.run(
-        {"input_tagAlign": tags,
-         "paired_end": paired_end,
-         "spp_version": spp_version},
-        name=name)
-
-
 @dxpy.entry_point('main')
 def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
          npeaks, nodups,  chrom_sizes, spp_version,
@@ -74,6 +58,7 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
     dxpy.download_dxfile(rep1_ta_file.get_id(), rep1_ta_file.name)
     rep1_ta_filename = rep1_ta_file.name
     ntags_rep1 = common.count_lines(rep1_ta_filename)
+
 
     simplicate_experiment = rep1_ta and not rep2_ta
     if simplicate_experiment:
@@ -134,12 +119,7 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
                  "prefix": 'pooled_reps'},
                 name='Pool replicates')
         pooled_replicates = pool_replicates_subjob.get_output_ref("pooled")
-        pooled_replicates_xcor_subjob = \
-            xcor_only(
-                pooled_replicates,
-                paired_end,
-                spp_version,
-                name='Pool cross-correlation')
+        pooled_xcors = [rep1_xcor, rep2_xcor]
 
     if unary_control:
         logger.info("Only one control supplied.")
@@ -197,7 +177,7 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
     rep1_peaks_subjob = spp(
         rep1_ta,
         rep1_control,
-        rep1_xcor,
+        [rep1_xcor],
         bigbed=True,
         name='Rep1 peaks vs %s' % (rep1_ctl_msg),
         prefix='R1', **common_args)
@@ -206,7 +186,7 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
         rep2_peaks_subjob = spp(
             rep2_ta,
             rep2_control,
-            rep2_xcor,
+            [rep2_xcor],
             bigbed=True,
             name='Rep2 peaks vs %s' % (rep2_ctl_msg),
             prefix='R2', **common_args)
@@ -214,7 +194,7 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
         pooled_peaks_subjob = spp(
             pooled_replicates,
             control_for_pool,
-            pooled_replicates_xcor_subjob.get_output_ref("CC_scores_file"),
+            pooled_xcors,
             bigbed=True,
             name='Pooled peaks vs %s' % (pool_ctl_msg),
             prefix='PL', **common_args)
@@ -258,7 +238,7 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
         rep1pr1_peaks_subjob = spp(
             rep1_pr_subjob.get_output_ref("pseudoreplicate1"),
             rep1_control,
-            rep1_xcor,
+            [rep1_xcor],
             bigbed=False,
             name='R1PR1 peaks vs %s' % (rep1_ctl_msg),
             prefix='R1PR1', **common_args)
@@ -266,7 +246,7 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
         rep1pr2_peaks_subjob = spp(
             rep1_pr_subjob.get_output_ref("pseudoreplicate2"),
             rep1_control,
-            rep1_xcor,
+            [rep1_xcor],
             bigbed=False,
             name='R1PR2 peaks vs %s' % (rep1_ctl_msg),
             prefix='R1PR2', **common_args)
@@ -300,7 +280,7 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
             rep2pr1_peaks_subjob = spp(
                 rep2_pr_subjob.get_output_ref("pseudoreplicate1"),
                 rep2_control,
-                rep2_xcor,
+                [rep2_xcor],
                 bigbed=False,
                 name='R2PR1 peaks vs %s' % (rep2_ctl_msg),
                 prefix='R2PR1', **common_args)
@@ -308,7 +288,7 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
             rep2pr2_peaks_subjob = spp(
                 rep2_pr_subjob.get_output_ref("pseudoreplicate2"),
                 rep2_control,
-                rep2_xcor,
+                [rep2_xcor],
                 bigbed=False,
                 name='R2PR2 peaks vs %s' % (rep2_ctl_msg),
                 prefix='R2PR2', **common_args)
@@ -316,7 +296,7 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
             pooledpr1_peaks_subjob = spp(
                 pool_pr1_subjob.get_output_ref("pooled"),
                 control_for_pool,
-                pooled_replicates_xcor_subjob.get_output_ref("CC_scores_file"),
+                pooled_xcors,
                 bigbed=False,
                 name='PPR1 peaks vs %s' % (pool_ctl_msg),
                 prefix='PPR1', **common_args)
@@ -324,7 +304,7 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
             pooledpr2_peaks_subjob = spp(
                 pool_pr2_subjob.get_output_ref("pooled"),
                 control_for_pool,
-                pooled_replicates_xcor_subjob.get_output_ref("CC_scores_file"),
+                pooled_xcors,
                 bigbed=False,
                 name='PPR2 peaks vs %s' % (pool_ctl_msg),
                 prefix='PPR2', **common_args)
@@ -337,5 +317,6 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
             })
 
     return output
+
 
 dxpy.run()

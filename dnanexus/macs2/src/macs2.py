@@ -22,6 +22,45 @@ logger.propagate = False
 logger.setLevel(logging.INFO)
 
 
+def xcor_parse(fname):
+    with open(fname, 'r') as xcor_file:
+        if not xcor_file:
+            return None
+
+        lines = xcor_file.read().splitlines()
+        line = lines[0].rstrip('\n')
+        # CC_SCORE FILE format:
+        #   Filename <tab>
+        #   numReads <tab>
+        #   estFragLen <tab>
+        #   corr_estFragLen <tab>
+        #   PhantomPeak <tab>
+        #   corr_phantomPeak <tab>
+        #   argmin_corr <tab>
+        #   min_corr <tab>
+        #   phantomPeakCoef <tab>
+        #   relPhantomPeakCoef <tab>
+        #   QualityTag
+
+        headers = ['Filename',
+                   'numReads',
+                   'estFragLen',
+                   'corr_estFragLen',
+                   'PhantomPeak',
+                   'corr_phantomPeak',
+                   'argmin_corr',
+                   'min_corr',
+                   'phantomPeakCoef',
+                   'relPhantomPeakCoef',
+                   'QualityTag']
+        metrics = line.split('\t')
+        headers.pop(0)
+        metrics.pop(0)
+
+        xcor_qc = dict(zip(headers, metrics))
+    return xcor_qc
+
+
 @dxpy.entry_point('main')
 def main(experiment, control, xcor_scores_input, chrom_sizes,
          narrowpeak_as, gappedpeak_as, broadpeak_as, genomesize, prefix=None,
@@ -29,7 +68,6 @@ def main(experiment, control, xcor_scores_input, chrom_sizes,
 
     experiment        = dxpy.DXFile(experiment)
     control           = dxpy.DXFile(control)
-    xcor_scores_input = dxpy.DXFile(xcor_scores_input)
     chrom_sizes       = dxpy.DXFile(chrom_sizes)
     narrowPeak_as     = dxpy.DXFile(narrowpeak_as)
     gappedPeak_as     = dxpy.DXFile(gappedpeak_as)
@@ -37,11 +75,15 @@ def main(experiment, control, xcor_scores_input, chrom_sizes,
 
     dxpy.download_dxfile(experiment.get_id(),        experiment.name)
     dxpy.download_dxfile(control.get_id(),           control.name)
-    dxpy.download_dxfile(xcor_scores_input.get_id(), xcor_scores_input.name)
     dxpy.download_dxfile(chrom_sizes.get_id(),       chrom_sizes.name)
     dxpy.download_dxfile(narrowPeak_as.get_id(),     narrowPeak_as.name)
     dxpy.download_dxfile(gappedPeak_as.get_id(),     gappedPeak_as.name)
     dxpy.download_dxfile(broadPeak_as.get_id(),      broadPeak_as.name)
+
+    xcor_scores_input_files = [dxpy.DXFile(xcor_scores) for xcor_scores in xcor_scores_input]
+    xcor_scores_input_filenames = [xcor_scores_input_file.name for xcor_scores_input_file in xcor_scores_input_files]
+    for dxfile, filename in zip(xcor_scores_input_files, xcor_scores_input_filenames):
+        dxpy.download_dxfile(dxfile.get_id(), filename)
 
     # Define the output filenames
 
@@ -62,17 +104,16 @@ def main(experiment, control, xcor_scores_input, chrom_sizes,
     fc_signal_fn     = "%s/%s.fc_signal.bw"     % (peaks_dirname, prefix)
     pvalue_signal_fn = "%s/%s.pvalue_signal.bw" % (peaks_dirname, prefix)
 
-    # Extract the fragment length estimate from column 3 of the
-    # cross-correlation scores file
-    # if the fragment_length argument is given, use that instead
+    # third column in the cross-correlation scores input file
+    # if fragment_length is provided, use that. Else read
+    # fragment length from xcor file
     if fragment_length is not None:
         fraglen = str(fragment_length)
-        logger.info("User given fragment length %s" % fraglen)
+        logger.info("User given fragment length %s" % (fraglen))
     else:
-        with open(xcor_scores_input.name, 'r') as fh:
-            firstline = fh.readline()
-            fraglen = firstline.split()[2]  # third column
-            logger.info("Fraglen %s" % (fraglen))
+        frag_lens = [int(xcor_parse(filename).get('estFragLen')) for filename in xcor_scores_input_filenames]
+        fraglen = int(round(sum(frag_lens) / len(frag_lens)))
+        logger.info("Fragment length %s" % (fraglen))
 
     # ===========================================
     # Generate narrow peaks and preliminary signal tracks
