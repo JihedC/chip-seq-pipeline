@@ -154,8 +154,14 @@ def main(experiment, control, xcor_scores_input, npeaks, nodups, bigbed,
 
     if not filecmp.cmp(peaks_filename,fix_coordinate_peaks_filename):
         logger.info("Returning peaks with fixed coordinates")
-        subprocess.check_call(shlex.split('gzip -n %s' % (fix_coordinate_peaks_filename)))
-        final_peaks_filename = fix_coordinate_peaks_filename + '.gz'
+
+    # Even if the fix_coordinates step is a no-op, it's still mportant to
+    # always launder the output of spp to remove gzip metadata
+    # spp adds that would make outputs have different md5's even with same
+    # inputs.  E.g. if same input was supplied in two different runs with
+    # different file names.
+    subprocess.check_call(shlex.split('gzip -n %s' % (fix_coordinate_peaks_filename)))
+    final_peaks_filename = fix_coordinate_peaks_filename + '.gz'
 
     subprocess.check_call('ls -l', shell=True)
     # print subprocess.check_output('head %s' %(final_peaks_filename), shell=True, stderr=subprocess.STDOUT)
