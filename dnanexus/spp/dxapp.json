@@ -126,10 +126,8 @@
         "folder": "/ChIP-seq/assets/"
       },
       {
-        "name": "common_asset",
-        "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
-        "version": "0.0.1",
-        "folder": "/ChIP-seq/assets/"
+          "name": "common_asset",
+          "id": "record-FB3Qjyj09Vybx15j15vgpgkF"
       },
       {
         "name": "spp_asset",

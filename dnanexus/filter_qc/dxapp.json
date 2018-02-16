@@ -161,10 +161,10 @@
       },
       {
             "name": "filter_qc_asset",
-            "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
+            "project": "project-BKp5K980bpZZ096Xp1XQ02fZ",
             "version": "0.0.1",
             "folder": "/ChIP-seq/assets/"
-      },
+      }
     ]
   },
   "access": {
