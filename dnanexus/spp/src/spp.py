@@ -30,45 +30,6 @@ logger.setLevel(logging.INFO)
 # }
 
 
-def xcor_parse(fname):
-    with open(fname, 'r') as xcor_file:
-        if not xcor_file:
-            return None
-
-        lines = xcor_file.read().splitlines()
-        line = lines[0].rstrip('\n')
-        # CC_SCORE FILE format:
-        #   Filename <tab>
-        #   numReads <tab>
-        #   estFragLen <tab>
-        #   corr_estFragLen <tab>
-        #   PhantomPeak <tab>
-        #   corr_phantomPeak <tab>
-        #   argmin_corr <tab>
-        #   min_corr <tab>
-        #   phantomPeakCoef <tab>
-        #   relPhantomPeakCoef <tab>
-        #   QualityTag
-
-        headers = ['Filename',
-                   'numReads',
-                   'estFragLen',
-                   'corr_estFragLen',
-                   'PhantomPeak',
-                   'corr_phantomPeak',
-                   'argmin_corr',
-                   'min_corr',
-                   'phantomPeakCoef',
-                   'relPhantomPeakCoef',
-                   'QualityTag']
-        metrics = line.split('\t')
-        headers.pop(0)
-        metrics.pop(0)
-
-        xcor_qc = dict(zip(headers, metrics))
-    return xcor_qc
-
-
 @dxpy.entry_point('main')
 def main(experiment, control, xcor_scores_input, npeaks, nodups, bigbed,
          chrom_sizes, spp_version, as_file=None, prefix=None,
@@ -122,7 +83,7 @@ def main(experiment, control, xcor_scores_input, npeaks, nodups, bigbed,
         fraglen = str(fragment_length)
         logger.info("User given fragment length %s" % (fraglen))
     else:
-        frag_lens = [int(xcor_parse(filename).get('estFragLen')) for filename in xcor_scores_input_filenames]
+        frag_lens = [common.xcor_fraglen(filename) for filename in xcor_scores_input_filenames]
         fraglen = int(round(sum(frag_lens) / len(frag_lens)))
         logger.info("Fragment length %s" % (fraglen))
 

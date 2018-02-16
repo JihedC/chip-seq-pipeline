@@ -153,15 +153,11 @@ def xcor_fraglen(filename):
     return int(fraglen)
 
 
-def frip(reads_filename, xcor_filename, peaks_filename, chrom_sizes_filename,
-         fragment_length=None, reads_in_peaks_fn='reads_in_peaks.ta'):
+def frip(reads_filename, peaks_filename, chrom_sizes_filename,
+         fragment_length, reads_in_peaks_fn='reads_in_peaks.ta'):
     # calculate FRiP
-    if fragment_length is None:
-        fraglen = xcor_fraglen(xcor_filename)
-    else:
-        fraglen = fragment_length
 
-    half_fraglen = int(fraglen)/2
+    half_fraglen = int(fragment_length)/2
     out, err = run_pipe([
         'slopBed -i %s -g %s -s -l %s -r %s' % (
             reads_filename, chrom_sizes_filename, -half_fraglen, half_fraglen),

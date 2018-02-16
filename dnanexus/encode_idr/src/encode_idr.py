@@ -50,24 +50,6 @@ def blacklist_filter(input_fname, output_fname, input_blacklist_fname):
         ], output_fname)
 
 
-def xcor_only(tags, paired_end, spp_version=None, name='xcor_only'):
-    xcor_only_applet = \
-        dxpy.find_one_data_object(
-            classname='applet',
-            name='xcor_only',
-            project=dxpy.PROJECT_CONTEXT_ID,
-            zero_ok=False,
-            more_ok=False,
-            return_handler=True)
-    applet_input = {
-        "input_tagAlign": tags,
-        "paired_end": paired_end
-    }
-    if spp_version:
-        applet_input.update({'spp_version': spp_version})
-    return xcor_only_applet.run(applet_input, name=name)
-
-
 def internal_pseudoreplicate_IDR(experiment, r1pr_peaks, rep1_ta, rep1_xcor,
                                  paired_end, chrom_sizes, as_file, blacklist,
                                  rep1_signal, fragment_length=None):
@@ -95,7 +77,6 @@ def internal_pseudoreplicate_IDR(experiment, r1pr_peaks, rep1_ta, rep1_xcor,
     # Calculate, or set the actually used fragment length value.
     # Set the fragment_length_given_by_user flag appropriately.
     if fragment_length is not None:
-        rep1_xcor_filename = None
         fragment_length_used_rep1 = fragment_length
         fragment_length_given_by_user = True
     else:
@@ -244,26 +225,14 @@ def replicated_IDR(experiment,
     # cases. Set the flag indicating whether the fragment length
     # was given by the user.
     if fragment_length is not None:
-        pool_xcor_filename = None
         fragment_length_used_rep1 = fragment_length
         fragment_length_used_rep2 = fragment_length
         fragment_length_used_pool = fragment_length
         fragment_length_given_by_user = True
     else:
-        pooled_replicates_xcor_subjob = \
-            xcor_only(
-                pool_replicates_subjob.get_output_ref("pooled"),
-                paired_end,
-                spp_version=None,
-                name='Pool cross-correlation')
-        pooled_replicates_xcor_subjob.wait_on_done()
-        pool_xcor_link = pooled_replicates_xcor_subjob.describe()['output'].get("CC_scores_file")
-        pool_xcor_file = dxpy.get_handler(pool_xcor_link)
-        pool_xcor_filename = 'poolcc_%s' % (pool_xcor_file.name)
-        dxpy.download_dxfile(pool_xcor_file.get_id(), pool_xcor_filename)
         fragment_length_used_rep1 = common.xcor_fraglen(rep1_xcor_filename)
         fragment_length_used_rep2 = common.xcor_fraglen(rep2_xcor_filename)
-        fragment_length_used_pool = common.xcor_fraglen(pool_xcor_filename)
+        fragment_length_used_pool = int(round(sum([fragment_length_used_rep1, fragment_length_used_rep2])/2))
         fragment_length_given_by_user = False
 
     pool_ta_link = pool_replicates_subjob.describe()['output'].get("pooled")
@@ -332,20 +301,20 @@ def replicated_IDR(experiment,
     # FRiP (fraction reads in peaks)
     # rep1 stable peaks comparing internal pseudoreplicates
     rep1_n_reads, rep1_n_reads_in_peaks, rep1_frip_score = common.frip(
-        rep1_ta_filename, rep1_xcor_filename, r1pr_peaks_filename,
-        chrom_sizes_filename, fragment_length)
+        rep1_ta_filename, r1pr_peaks_filename, chrom_sizes_filename,
+        fragment_length_used_rep1)
     # rep2 stable peaks comparing internal pseudoreplicates
     rep2_n_reads, rep2_n_reads_in_peaks, rep2_frip_score = common.frip(
-        rep2_ta_filename, rep2_xcor_filename, r2pr_peaks_filename,
-        chrom_sizes_filename, fragment_length)
+        rep2_ta_filename, r2pr_peaks_filename, chrom_sizes_filename,
+        fragment_length_used_rep2)
     # comparing true reps
     true_n_reads, true_n_reads_in_peaks, true_frip_score = common.frip(
-        pool_ta_filename, pool_xcor_filename, reps_peaks_filename,
-        chrom_sizes_filename, fragment_length)
+        pool_ta_filename, reps_peaks_filename, chrom_sizes_filename,
+        fragment_length_used_pool)
     # comparing pooled pseudoreplicates
     pr_n_reads, pr_n_reads_in_peaks, pr_frip_score = common.frip(
-        pool_ta_filename, pool_xcor_filename, pooledpr_peaks_filename,
-        chrom_sizes_filename, fragment_length)
+        pool_ta_filename, pooledpr_peaks_filename, chrom_sizes_filename,
+        fragment_length_used_pool)
 
     output = {
         "rep1_frip_nreads"           : rep1_n_reads,

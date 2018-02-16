@@ -22,45 +22,6 @@ logger.propagate = False
 logger.setLevel(logging.INFO)
 
 
-def xcor_parse(fname):
-    with open(fname, 'r') as xcor_file:
-        if not xcor_file:
-            return None
-
-        lines = xcor_file.read().splitlines()
-        line = lines[0].rstrip('\n')
-        # CC_SCORE FILE format:
-        #   Filename <tab>
-        #   numReads <tab>
-        #   estFragLen <tab>
-        #   corr_estFragLen <tab>
-        #   PhantomPeak <tab>
-        #   corr_phantomPeak <tab>
-        #   argmin_corr <tab>
-        #   min_corr <tab>
-        #   phantomPeakCoef <tab>
-        #   relPhantomPeakCoef <tab>
-        #   QualityTag
-
-        headers = ['Filename',
-                   'numReads',
-                   'estFragLen',
-                   'corr_estFragLen',
-                   'PhantomPeak',
-                   'corr_phantomPeak',
-                   'argmin_corr',
-                   'min_corr',
-                   'phantomPeakCoef',
-                   'relPhantomPeakCoef',
-                   'QualityTag']
-        metrics = line.split('\t')
-        headers.pop(0)
-        metrics.pop(0)
-
-        xcor_qc = dict(zip(headers, metrics))
-    return xcor_qc
-
-
 @dxpy.entry_point('main')
 def main(experiment, control, xcor_scores_input, chrom_sizes,
          narrowpeak_as, gappedpeak_as, broadpeak_as, genomesize, prefix=None,
@@ -111,8 +72,8 @@ def main(experiment, control, xcor_scores_input, chrom_sizes,
         fraglen = str(fragment_length)
         logger.info("User given fragment length %s" % (fraglen))
     else:
-        frag_lens = [int(xcor_parse(filename).get('estFragLen')) for filename in xcor_scores_input_filenames]
-        fraglen = int(round(sum(frag_lens) / len(frag_lens)))
+        fraglens = [common.xcor_fraglen(filename) for filename in xcor_scores_input_filenames]
+        fraglen = int(round(sum(fraglens) / len(fraglens)))
         logger.info("Fragment length %s" % (fraglen))
 
     # ===========================================
@@ -325,5 +286,6 @@ def main(experiment, control, xcor_scores_input, chrom_sizes,
     }
 
     return output
+
 
 dxpy.run()
