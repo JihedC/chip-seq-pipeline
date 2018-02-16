@@ -159,12 +159,12 @@ def resolve_accession(accession, server, keypair):
 
         if snapshot_project:
             try:
-                accession_search = accession + '*'
+                accession_search = "%s\.(fastq|fq)\.gz" % (accession)
                 logger.debug(
                     'Looking recursively for %s in %s'
                     % (accession_search, snapshot_project.name))
                 file_handler = dxpy.find_one_data_object(
-                    name=accession_search, name_mode='glob', more_ok=False,
+                    name=accession_search, name_mode='regexp', more_ok=False,
                     classname='file', recurse=True, return_handler=True,
                     folder='/', project=snapshot_project.get_id())
                 logger.debug('Got file handler for %s' % (file_handler.name))
