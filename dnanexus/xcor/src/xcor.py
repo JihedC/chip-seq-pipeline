@@ -11,12 +11,14 @@
 # DNAnexus Python Bindings (dxpy) documentation:
 #   http://autodoc.dnanexus.com/bindings/python/current/
 
-import subprocess
-import shlex
 from multiprocessing import cpu_count
+from tempfile import NamedTemporaryFile
+from pprint import pprint, pformat
 import dxpy
 import common
 import logging
+import subprocess
+import shlex
 
 logger = logging.getLogger(__name__)
 logger.addHandler(dxpy.DXLogHandler())
@@ -24,10 +26,8 @@ logger.propagate = False
 logger.setLevel(logging.INFO)
 
 
-# SPP_VERSION_MAP = {
-#     "1.10.1": "/phantompeakqualtools/spp_1.10.1.tar.gz",
-#     "1.14":   "/phantompeakqualtools/spp-1.14.tar.gz"
-# }
+class InputException(Exception):
+    pass
 
 
 def xcor_parse(fname):
@@ -69,72 +69,69 @@ def xcor_parse(fname):
     return xcor_qc
 
 
-@dxpy.entry_point('main')
-def main(input_bam, paired_end, spp_version):
+def single_true(iterable):
+    i = iter(iterable)
+    return any(i) and not any(i)
 
-    # The following line(s) initialize your data object inputs on the platform
-    # into dxpy.DXDataObject instances that you can start using immediately.
 
-    input_bam_file = dxpy.DXFile(input_bam)
+@dxpy.entry_point('map_for_xcor')
+def map_for_xcor(input_fastq, reference_tar, crop_length):
+    encode_map_applet = dxpy.find_one_data_object(
+        classname='applet',
+        name='encode_map',
+        project=dxpy.PROJECT_CONTEXT_ID,
+        zero_ok=False,
+        more_ok=False,
+        return_handler=True)
+    filter_qc_applet = dxpy.find_one_data_object(
+        classname='applet',
+        name='filter_qc',
+        project=dxpy.PROJECT_CONTEXT_ID,
+        zero_ok=False,
+        more_ok=False,
+        return_handler=True)
 
-    input_bam_filename = input_bam_file.name
-    input_bam_basename = input_bam_file.name.rstrip('.bam')
-    dxpy.download_dxfile(input_bam_file.get_id(), input_bam_filename)
+    mapping_subjob = \
+        encode_map_applet.run(
+            {"reads1": input_fastq,
+             "crop_length": crop_length or 'native',
+             "hard_crop": False,  # allow reads less than the crop length
+             "reference_tar": reference_tar},
+            name='map_for_xcor')
+    filter_qc_subjob = \
+        filter_qc_applet.run(
+            {"input_bam": mapping_subjob.get_output_ref("mapped_reads"),
+             "paired_end": False},
+            name='filter_qc_for_xcor')
+    # filter_qc_subjob.wait_on_done()
+    # tagAlign_for_xcor = filter_qc_subjob.describe()['output'].get("tagAlign_file")
+    output = {'tagAlign': filter_qc_subjob.get_output_ref('tagAlign_file')}
+    return output
 
-    intermediate_TA_filename = input_bam_basename + ".tagAlign"
-    if paired_end:
-        end_infix = 'PE2SE'
-    else:
-        end_infix = 'SE'
-    final_TA_filename = input_bam_basename + '.' + end_infix + '.tagAlign.gz'
 
-    # ===================
-    # Create tagAlign file
-    # ===================
+@dxpy.entry_point('xcor_from_ta')
+def xcor_from_ta(input_tagAlign, Nreads):
 
-    out, err = common.run_pipe([
-        "bamToBed -i %s" % (input_bam_filename),
-        r"""awk 'BEGIN{OFS="\t"}{$4="N";$5="1000";print $0}'""",
-        "tee %s" % (intermediate_TA_filename),
-        "gzip -cn"],
-        outfile=final_TA_filename)
-
-    # ================
-    # Create BEDPE file
-    # ================
-    if paired_end:
-        final_BEDPE_filename = input_bam_basename + ".bedpe.gz"
-        # need namesorted bam to make BEDPE
-        final_nmsrt_bam_prefix = input_bam_basename + ".nmsrt"
-        final_nmsrt_bam_filename = final_nmsrt_bam_prefix + ".bam"
-        samtools_sort_command = \
-            "samtools sort -n %s %s" % (input_bam_filename, final_nmsrt_bam_prefix)
-        logger.info(samtools_sort_command)
-        subprocess.check_output(shlex.split(samtools_sort_command))
-        out, err = common.run_pipe([
-            "bamToBed -bedpe -mate1 -i %s" % (final_nmsrt_bam_filename),
-            "gzip -cn"],
-            outfile=final_BEDPE_filename)
+    input_tagAlign_file = dxpy.DXFile(input_tagAlign)
+    input_tagAlign_filename = input_tagAlign_file.name
+    dxpy.download_dxfile(input_tagAlign_file.get_id(), input_tagAlign_filename)
+    intermediate_TA_filename = common.uncompress(input_tagAlign_file.name)
 
     # =================================
     # Subsample tagAlign file
     # ================================
+    input_TA_basename = intermediate_TA_filename.rstrip('.tagAlign')
     logger.info(
-        "Intermediate tA md5: %s" % (common.md5(intermediate_TA_filename)))
-    NREADS = 15000000
-    if paired_end:
-        end_infix = 'MATE1'
-    else:
-        end_infix = 'SE'
+        "Subsampling from tagAlign file %s with md5 %s"
+        % (intermediate_TA_filename, common.md5(intermediate_TA_filename)))
+    sample_from_filename = intermediate_TA_filename
     subsampled_TA_filename = \
-        input_bam_basename + \
-        ".filt.nodup.sample.%d.%s.tagAlign.gz" % (NREADS/1000000, end_infix)
+        input_TA_basename + \
+        ".%d.tagAlign.gz" % (Nreads/1000000)
     steps = [
-        'grep -v "chrM" %s' % (intermediate_TA_filename),
-        'shuf -n %d --random-source=%s' % (NREADS, intermediate_TA_filename)]
-    if paired_end:
-        steps.extend([r"""awk 'BEGIN{OFS="\t"}{$4="N";$5="1000";print $0}'"""])
-    steps.extend(['gzip -cn'])
+        'grep -v "chrM" %s' % (sample_from_filename),
+        'shuf -n %d --random-source=%s' % (Nreads, sample_from_filename),
+        'gzip -cn']
     out, err = common.run_pipe(steps, outfile=subsampled_TA_filename)
     logger.info(
         "Subsampled tA md5: %s" % (common.md5(subsampled_TA_filename)))
@@ -156,42 +153,95 @@ def main(input_bam, paired_end, spp_version):
     # relPhantomPeakCoef <tab>
     # QualityTag
 
-    # spp_tarball = SPP_VERSION_MAP.get(spp_version)
-    # assert spp_tarball, "spp version %s is not supported" % (spp_version)
-    # # install spp
-    # subprocess.check_output(shlex.split('R CMD INSTALL %s' % (spp_tarball)))
-    # run spp
     run_spp_command = '/phantompeakqualtools/run_spp.R'
-    out, err = common.run_pipe([
-        "Rscript %s -c=%s -p=%d -filtchr=chrM -savp=%s -out=%s"
-        % (run_spp_command, subsampled_TA_filename, cpu_count(),
-           CC_plot_filename, CC_scores_filename)])
-    out, err = common.run_pipe([
-        r"""sed -r  's/,[^\t]+//g' %s""" % (CC_scores_filename)],
-        outfile="temp")
-    out, err = common.run_pipe([
-        "mv temp %s" % (CC_scores_filename)])
+    xcor_command = "Rscript %s -c=%s -p=%d -filtchr=chrM -savp=%s -out=%s" \
+                   % (run_spp_command, subsampled_TA_filename, cpu_count(),
+                      CC_plot_filename, CC_scores_filename)
+    logger.info(xcor_command)
+    subprocess.check_call(shlex.split(xcor_command))
 
-    tagAlign_file = dxpy.upload_local_file(final_TA_filename)
-    if paired_end:
-        BEDPE_file = dxpy.upload_local_file(final_BEDPE_filename)
+    # Edit CC scores file to be tab-delimited
+    with NamedTemporaryFile(mode='w') as fh:
+        sed_command = r"""sed -r  's/,[^\t]+//g' %s""" % (CC_scores_filename)
+        logger.info(sed_command)
+        subprocess.check_call(shlex.split(sed_command), stdout=fh)
+        cp_command = "cp %s %s" % (fh.name, CC_scores_filename)
+        logger.info(cp_command)
+        subprocess.check_call(shlex.split(cp_command))
 
+    logger.info("Uploading results files to the project")
     CC_scores_file = dxpy.upload_local_file(CC_scores_filename)
     CC_plot_file = dxpy.upload_local_file(CC_plot_filename)
     xcor_qc = xcor_parse(CC_scores_filename)
 
+    logger.info("xcor_qc:\n%s" % (pformat(xcor_qc)))
+
     # Return the outputs
     output = {
-        "tagAlign_file": dxpy.dxlink(tagAlign_file),
         "CC_scores_file": dxpy.dxlink(CC_scores_file),
         "CC_plot_file": dxpy.dxlink(CC_plot_file),
-        "paired_end": paired_end,
         "RSC": float(xcor_qc.get('relPhantomPeakCoef')),
         "NSC": float(xcor_qc.get('phantomPeakCoef')),
         "est_frag_len": float(xcor_qc.get('estFragLen'))
     }
+    logger.info("Exiting with output:\n%s" % (pformat(output)))
+    return output
+
+
+@dxpy.entry_point('main')
+def main(paired_end, Nreads, crop_length=None, input_bam=None, input_fastq=None,
+         input_tagAlign=None, reference_tar=None):
+
+    if not any([input_bam, input_fastq, input_tagAlign]):
+        logger.error("No input specified")
+        raise InputException("At least one input is required")
+
+    if not input_fastq and paired_end:
+        logger.error("Cross-correlation analysis is not supported for paired_end mapping.  Supply read1 fastq instead.")
+        raise InputException("Paired-end input is not allowed")
+
     if paired_end:
-        output.update({"BEDPE_file": dxpy.dxlink(BEDPE_file)})
+        map_for_xcor_input = {
+            "input_fastq": input_fastq,
+            "reference_tar": reference_tar,
+            "crop_length": crop_length
+        }
+        map_for_xcor_subjob = dxpy.new_dxjob(map_for_xcor_input, "map_for_xcor")
+        input_tagAlign = map_for_xcor_subjob.get_output_ref("tagAlign")
+        xcor_from_ta_input = {
+            "input_tagAlign": input_tagAlign,
+            'Nreads': Nreads
+        }
+        xcor_from_ta_subjob = dxpy.new_dxjob(xcor_from_ta_input, "xcor_from_ta")
+        xcor_output_keys = [
+            'CC_scores_file',
+            'CC_plot_file',
+            'RSC',
+            'NSC',
+            'est_frag_len']
+        output = dict(zip(
+            xcor_output_keys,
+            map(xcor_from_ta_subjob.get_output_ref, xcor_output_keys)))
+    elif input_tagAlign:
+        output = xcor_from_ta(input_tagAlign, Nreads)
+    else:
+        input_bam_file = dxpy.DXFile(input_bam)
+        input_bam_filename = input_bam_file.name
+        input_bam_basename = input_bam_file.name.rstrip('.bam')
+        tagAlign_filename = input_bam_basename + '.tagAlign.gz'
+        dxpy.download_dxfile(input_bam_file.get_id(), input_bam_filename)
+        # ===================
+        # Create tagAlign file
+        # ===================
+        out, err = common.run_pipe([
+            "bamToBed -i %s" % (input_bam_filename),
+            r"""awk 'BEGIN{OFS="\t"}{$4="N";$5="1000";print $0}'""",
+            "gzip -cn"],
+            outfile=tagAlign_filename)
+        input_tagAlign = dxpy.upload_local_file(tagAlign_filename)
+        output = xcor_from_ta(input_tagAlign, Nreads)
+
+    logger.info("Exiting with output:\n%s" % (pformat(output)))
     return output
 
 

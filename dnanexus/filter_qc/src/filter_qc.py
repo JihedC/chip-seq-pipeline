@@ -18,6 +18,7 @@ import re
 import common
 import dxpy
 import logging
+from multiprocessing import cpu_count
 from pprint import pprint, pformat
 
 logger = logging.getLogger(__name__)
@@ -125,7 +126,7 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
     raw_bam_basename = raw_bam_file.name.rstrip('.bam')
     raw_bam_file_mapstats_filename = raw_bam_basename + '.flagstat.qc'
     dxpy.download_dxfile(raw_bam_file.get_id(), raw_bam_filename)
-    subprocess.check_output('set -x; ls -l', shell=True)
+    subprocess.check_call('ls -l', shell=True)
 
     # Generate initial mapping statistics
     with open(raw_bam_file_mapstats_filename, 'w') as fh:
@@ -141,7 +142,6 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
         # not primary alignment, reads failing platform
         # Remove low MAPQ reads
         # Only keep properly paired reads
-        # Obtain name sorted BAM file
         # ==================
         tmp_filt_bam_prefix = "tmp.%s" % (filt_bam_prefix)  # was tmp.prefix.nmsrt
         tmp_filt_bam_filename = tmp_filt_bam_prefix + ".bam"
@@ -155,30 +155,33 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
             # sort:  -n sort by name; - take input from stdin;
             # out to specified filename
             # Will produce name sorted BAM
+            # new syntax: "samtools sort -@ %d -n -o %s" % (cpu_count(), tmp_filt_bam_filename)])
             "samtools sort -n - %s" % (tmp_filt_bam_prefix)])
         if err:
             logger.error("samtools error: %s" % (err))
         # Remove orphan reads (pair was removed)
         # and read pairs mapping to different chromosomes
         # Obtain position sorted BAM
-        subprocess.check_output('set -x; ls -l', shell=True)
+        subprocess.check_call('ls -l', shell=True)
         out, err = common.run_pipe([
             # fill in mate coordinates, ISIZE and mate-related flags
             # fixmate requires name-sorted alignment; -r removes secondary and
             # unmapped (redundant here because already done above?)
-            # - send output to stdout
+            # - send sam-formatted output to stdout
+            # new syntax:
+            # "samtools fixmate -r -O sam %s -" % (tmp_filt_bam_filename),
             "samtools fixmate -r %s -" % (tmp_filt_bam_filename),
             # repeat filtering after mate repair
             "samtools view -F 1804 -f 2 -u -",
             # produce the coordinate-sorted BAM
+            # new syntax: "samtools sort -@ %d -o %s" % (cpu_count(), filt_bam_filename)])
             "samtools sort - %s" % (filt_bam_prefix)])
-        subprocess.check_output('set -x; ls -l', shell=True)
+        subprocess.check_call('ls -l', shell=True)
     else:  # single-end data
         # =============================
         # Remove unmapped, mate unmapped
         # not primary alignment, reads failing platform
         # Remove low MAPQ reads
-        # Obtain name sorted BAM file
         # ==================
         with open(filt_bam_filename, 'w') as fh:
             samtools_filter_command = (
@@ -196,7 +199,10 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
     tmp_filt_bam_filename = raw_bam_basename + ".dupmark.bam"
     dup_file_qc_filename = raw_bam_basename + ".dup.qc"
     picard_string = ' '.join([
+        # 1.92 syntax: 
         "java -Xmx4G -jar /picard/MarkDuplicates.jar",
+        # new syntax
+        # "java -Xmx4G -jar /picard/picard.jar MarkDuplicates",
         "INPUT=%s" % (filt_bam_filename),
         "OUTPUT=%s" % (tmp_filt_bam_filename),
         "METRICS_FILE=%s" % (dup_file_qc_filename),
@@ -217,27 +223,27 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
     # QC file
     final_bam_file_mapstats_filename = final_bam_prefix + ".flagstat.qc"
 
+    # ============================
+    # Remove duplicates
+    # Index final position sorted BAM
+    # ============================
     if paired_end:
         samtools_dedupe_command = \
             "samtools view -F 1804 -f2 -b %s" % (filt_bam_filename)
     else:
         samtools_dedupe_command = \
             "samtools view -F 1804 -b %s" % (filt_bam_filename)
-
-    # ============================
-    # Remove duplicates
-    # Index final position sorted BAM
-    # ============================
     with open(final_bam_filename, 'w') as fh:
         logger.info(samtools_dedupe_command)
         subprocess.check_call(
             shlex.split(samtools_dedupe_command),
             stdout=fh)
     # Index final bam file
+    # new syntax: "samtools index %s %s" % (final_bam_filename, final_bam_index_filename)
     samtools_index_command = \
-        "samtools index %s %s" % (final_bam_filename, final_bam_index_filename)
+        "samtools index %s" % (final_bam_filename)
     logger.info(samtools_index_command)
-    subprocess.check_output(shlex.split(samtools_index_command))
+    subprocess.check_call(shlex.split(samtools_index_command))
 
     # Generate mapping statistics
     with open(final_bam_file_mapstats_filename, 'w') as fh:
@@ -263,6 +269,7 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
     # PBC2=OnePair/TwoPair
     if paired_end:
         steps = [
+            # new syntax: "samtools sort -@ %d -n %s" % (cpu_count(), filt_bam_filename),
             "samtools sort -no %s -" % (filt_bam_filename),
             "bamToBed -bedpe -i stdin",
             r"""awk 'BEGIN{OFS="\t"}{print $1,$2,$4,$6,$9,$10}'"""]
@@ -280,14 +287,55 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
     if err:
         logger.error("PBC file error: %s" % (err))
 
+    # ===================
+    # Generate bed-like files from filtered mappings
+    # ===================
+    # Create tagAlign file
+    # ===================
+    if paired_end:
+        end_infix = 'PE2SE'
+    else:
+        end_infix = 'SE'
+    final_TA_filename = final_bam_prefix + '.' + end_infix + '.tagAlign.gz'
+    out, err = common.run_pipe([
+        "bamToBed -i %s" % (final_bam_filename),
+        r"""awk 'BEGIN{OFS="\t"}{$4="N";$5="1000";print $0}'""",
+        "gzip -cn"],
+        outfile=final_TA_filename)
+
+    if paired_end:
+        # ================
+        # Create BEDPE file
+        # ================
+        final_BEDPE_filename = final_bam_prefix + ".bedpe.gz"
+        # need namesorted bam to make BEDPE
+        final_nmsrt_bam_prefix = final_bam_prefix + ".nmsrt"
+        final_nmsrt_bam_filename = final_nmsrt_bam_prefix + ".bam"
+        samtools_sort_command = \
+            "samtools sort -n %s %s" % (final_bam_filename, final_nmsrt_bam_prefix)
+            # new syntax: "samtools sort -n -@ %d -o %s %s" % (cpu_count(), final_nmsrt_bam_filename, final_bam_filename)
+        logger.info(samtools_sort_command)
+        subprocess.check_call(shlex.split(samtools_sort_command))
+        out, err = common.run_pipe([
+            "bamToBed -bedpe -mate1 -i %s" % (final_nmsrt_bam_filename),
+            "gzip -cn"],
+            outfile=final_BEDPE_filename)
+
     output = {}
     logger.info("Uploading results files to the project")
     filtered_bam = dxpy.upload_local_file(final_bam_filename)
     filtered_bam_index = dxpy.upload_local_file(final_bam_index_filename)
+    tagAlign_file = dxpy.upload_local_file(final_TA_filename)
     output.update({
         "filtered_bam": dxpy.dxlink(filtered_bam),
-        "filtered_bam_index": dxpy.dxlink(filtered_bam_index)
+        "filtered_bam_index": dxpy.dxlink(filtered_bam_index),
+        "tagAlign_file": dxpy.dxlink(tagAlign_file)
     })
+    if paired_end:
+        BEDPE_file = dxpy.upload_local_file(final_BEDPE_filename)
+        output.update({
+            "BEDPE_file": dxpy.dxlink(BEDPE_file)
+        })
 
     # If the scrub parameter is true, pass the bams to the scrub applet.
     if scrub:
@@ -325,10 +373,10 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
         useable_fragments = final_mapstats_qc.get('in_total')[0]/2
     else:
         useable_fragments = final_mapstats_qc.get('in_total')[0]
-    logger.info("initial_mapstats_qc: %s" % (initial_mapstats_qc)),
-    logger.info("final_mapstats_qc: %s" % (final_mapstats_qc)),
-    logger.info("dup_qc: %s" % (dup_qc))
-    logger.info("pbc_qc: %s" % (pbc_qc))
+    logger.info("initial_mapstats_qc:\n%s" % (pformat(initial_mapstats_qc)))
+    logger.info("final_mapstats_qc:\n%s" % (pformat(final_mapstats_qc)))
+    logger.info("dup_qc:\n%s" % (pformat(dup_qc)))
+    logger.info("pbc_qc:\n%s" % (pformat(pbc_qc)))
 
     # Return links to the output files and values.
     output.update({

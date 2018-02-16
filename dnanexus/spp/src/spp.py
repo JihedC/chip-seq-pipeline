@@ -40,7 +40,7 @@ def main(experiment, control, xcor_scores_input, npeaks, nodups, bigbed,
 
     experiment_file = dxpy.DXFile(experiment)
     control_file = dxpy.DXFile(control)
-    xcor_scores_input_file = dxpy.DXFile(xcor_scores_input)
+    xcor_scores_input_files = [dxpy.DXFile(xcor_scores) for xcor_scores in xcor_scores_input]
     chrom_sizes_file = dxpy.DXFile(chrom_sizes)
     chrom_sizes_filename = chrom_sizes_file.name
     dxpy.download_dxfile(chrom_sizes_file.get_id(), chrom_sizes_filename)
@@ -58,9 +58,9 @@ def main(experiment, control, xcor_scores_input, npeaks, nodups, bigbed,
     control_filename = control_file.name
     dxpy.download_dxfile(control_file.get_id(), control_filename)
 
-    xcor_scores_input_filename = xcor_scores_input_file.name
-    dxpy.download_dxfile(
-        xcor_scores_input_file.get_id(), xcor_scores_input_filename)
+    xcor_scores_input_filenames = [xcor_scores_input_file.name for xcor_scores_input_file in xcor_scores_input_files]
+    for dxfile, filename in zip(xcor_scores_input_files, xcor_scores_input_filenames):
+        dxpy.download_dxfile(dxfile.get_id(), filename)
 
     if not prefix:
         output_filename_prefix = \
@@ -83,11 +83,9 @@ def main(experiment, control, xcor_scores_input, npeaks, nodups, bigbed,
         fraglen = str(fragment_length)
         logger.info("User given fragment length %s" % (fraglen))
     else:
-        fraglen_column = 3
-        with open(xcor_scores_input_filename, 'r') as f:
-            line = f.readline()
-            fraglen = line.split('\t')[fraglen_column-1]
-            logger.info("Read fragment length: %s" % (fraglen))
+        frag_lens = [common.xcor_fraglen(filename) for filename in xcor_scores_input_filenames]
+        fraglen = int(round(sum(frag_lens) / len(frag_lens)))
+        logger.info("Fragment length %s" % (fraglen))
 
     # spp_tarball = SPP_VERSION_MAP.get(spp_version)
     # assert spp_tarball, "spp version %s is not supported" % (spp_version)
@@ -101,6 +99,11 @@ def main(experiment, control, xcor_scores_input, npeaks, nodups, bigbed,
            xcor_scores_filename))
     logger.info(spp_command)
     subprocess.check_call(shlex.split(spp_command))
+
+    # the run_spp.R script generates a gzipped peaks file which may have a
+    # different md5 even with identical input reads if the output filenames
+    # differ. Here we should probably gzip -dc | gzip -n to make md5-identical
+    # outputs from identical reads input irrespective of output filename
 
     # when one of the peak coordinates are an exact multiple of 10, spp (R)
     # outputs the coordinate in scientific notation

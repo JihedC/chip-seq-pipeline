@@ -52,6 +52,17 @@
       "class": "file"
     },
     {
+        "name": "tagAlign_file",
+        "label": "Final tagAlign file.",
+        "class": "file"
+    },
+    {
+        "name": "BEDPE_file",
+        "label": "BEDPE file (read pairs on each line)",
+        "class": "file",
+        "optional": true
+    },
+    {
       "name": "filtered_mapstats",
       "label": "Post-filtering mapping statistics.",
       "class": "file"
@@ -137,22 +148,7 @@
   "runSpec": {
     "interpreter": "python2.7",
     "file": "src/filter_qc.py",
-    "execDepends": [
-      {"name": "samtools",
-       "package_manager": "git",
-       "url": "https://github.com/samtools/samtools.git",
-       "destdir": "/tmp",
-       "tag": "0.1.19",
-       "build_commands": "make samtools && cp /tmp/samtools/samtools /usr/local/bin/samtools"},
-      {"name": "bedtools"},
-      {"name": "ant"},
-      {"name": "openjdk-6-jdk"},
-      {"name": "picard",
-       "package_manager": "git",
-       "url": "https://github.com/broadinstitute/picard.git",
-       "tag": "1.92",
-       "build_commands": "ant -Djava6.home=/usr/lib/jvm/java-6-openjdk-amd64/ -Ddist=/picard -lib lib/ant package-commands"}
-     ],
+    "execDepends": [],
     "systemRequirements": {
       "main": {"instanceType": "mem3_hdd2_x2"}
     },
@@ -162,7 +158,13 @@
             "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
             "version": "0.0.1",
             "folder": "/ChIP-seq/assets/"
-      }
+      },
+      {
+            "name": "filter_qc_asset",
+            "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
+            "version": "0.0.1",
+            "folder": "/ChIP-seq/assets/"
+      },
     ]
   },
   "access": {

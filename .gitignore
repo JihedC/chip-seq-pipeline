@@ -11,3 +11,5 @@ dnanexus/accessionator/resources/keypairs.json
 
 
 dnanexus/.python-version
+
+*.log
