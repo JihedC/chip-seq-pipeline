@@ -196,11 +196,16 @@ def main(paired_end, Nreads, crop_length=None, input_bam=None, input_fastq=None,
         logger.error("No input specified")
         raise InputException("At least one input is required")
 
-    if not input_fastq and paired_end:
+    if not single_true([input_bam, input_fastq, input_tagAlign]):
+        logger.error("Multiple inputs specified")
+        raise InputException("Only one input is allowed")
+
+    if (input_bam or input_tagAlign) and paired_end:
         logger.error("Cross-correlation analysis is not supported for paired_end mapping.  Supply read1 fastq instead.")
         raise InputException("Paired-end input is not allowed")
 
-    if paired_end:
+    # Should rearchitect this to use subjobs so the main instance doesn't wait idle for the mapping instances to complete
+    if input_fastq:
         map_for_xcor_input = {
             "input_fastq": input_fastq,
             "reference_tar": reference_tar,
@@ -222,9 +227,7 @@ def main(paired_end, Nreads, crop_length=None, input_bam=None, input_fastq=None,
         output = dict(zip(
             xcor_output_keys,
             map(xcor_from_ta_subjob.get_output_ref, xcor_output_keys)))
-    elif input_tagAlign:
-        output = xcor_from_ta(input_tagAlign, Nreads)
-    else:
+    elif input_bam:
         input_bam_file = dxpy.DXFile(input_bam)
         input_bam_filename = input_bam_file.name
         input_bam_basename = input_bam_file.name.rstrip('.bam')
@@ -239,6 +242,8 @@ def main(paired_end, Nreads, crop_length=None, input_bam=None, input_fastq=None,
             "gzip -cn"],
             outfile=tagAlign_filename)
         input_tagAlign = dxpy.upload_local_file(tagAlign_filename)
+        output = xcor_from_ta(input_tagAlign, Nreads)
+    else:
         output = xcor_from_ta(input_tagAlign, Nreads)
 
     logger.info("Exiting with output:\n%s" % (pformat(output)))
