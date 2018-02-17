@@ -58,7 +58,7 @@ def main(input_tags, prefix=None):
 
     pr_ta_filenames = \
         [input_tags_basename + ".%s.pr1.tagAlign.gz" % (filename_infix),
-         input_tags_filename + ".%s.pr2.tagAlign.gz" % (filename_infix)]
+         input_tags_basename + ".%s.pr2.tagAlign.gz" % (filename_infix)]
 
     # count lines in the file
     out, err = common.run_pipe([
