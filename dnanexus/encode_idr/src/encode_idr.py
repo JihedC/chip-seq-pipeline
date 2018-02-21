@@ -107,8 +107,8 @@ def internal_pseudoreplicate_IDR(experiment, r1pr_peaks, rep1_ta, rep1_xcor,
     # calculate FRiP
 
     n_reads, n_reads_in_peaks, frip_score = common.frip(
-        rep1_ta_filename, rep1_xcor_filename, stable_set_filename,
-        chrom_sizes_filename, fragment_length_used_rep1)
+        rep1_ta_filename, stable_set_filename, chrom_sizes_filename,
+        fragment_length_used_rep1)
 
     output = {
         "rep1_frip_nreads": n_reads,
