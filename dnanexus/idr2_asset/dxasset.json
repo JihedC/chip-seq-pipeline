@@ -1,0 +1,10 @@
+{
+  "name": "idr2_asset",
+  "title": "idr2 asset",
+  "description": "Everything to run idr2",
+  "version": "0.0.1",
+  "distribution": "Ubuntu",
+  "instanceType": "mem3_hdd2_x2",
+  "release": "14.04",
+  "execDepends": []
+}
