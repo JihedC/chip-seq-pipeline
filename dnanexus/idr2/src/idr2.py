@@ -15,7 +15,6 @@ import os
 import logging
 import subprocess
 import shlex
-import sys
 import math
 import dxpy
 import common
@@ -26,7 +25,8 @@ logger.propagate = False
 logger.setLevel(logging.INFO)
 
 
-def common_peaks(pooled_peaks_filename, rep1_peaks_filename, rep2_peaks_filename, pooled_common_peaks_filename):
+def common_peaks(pooled_peaks_filename, rep1_peaks_filename,
+                 rep2_peaks_filename, pooled_common_peaks_filename):
     print pooled_peaks_filename
     print rep1_peaks_filename
     print rep2_peaks_filename
@@ -186,7 +186,7 @@ def main(rep1_peaks, rep2_peaks, pooled_peaks, idr_threshold, rank):
         "N": n_peaks
     })
 
-    logging.info("Exiting with output: %s", output)
+    logger.info("Exiting with output: %s", output)
     return output
 
 
