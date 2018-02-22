@@ -12,7 +12,6 @@
 #   http://autodoc.dnanexus.com/bindings/python/current/
 
 import os
-import re
 import logging
 import subprocess
 import shlex
@@ -20,6 +19,11 @@ import sys
 import math
 import dxpy
 import common
+
+logger = logging.getLogger(__name__)
+logger.addHandler(dxpy.DXLogHandler())
+logger.propagate = False
+logger.setLevel(logging.INFO)
 
 
 def common_peaks(pooled_peaks_filename, rep1_peaks_filename, rep2_peaks_filename, pooled_common_peaks_filename):
@@ -53,42 +57,36 @@ def run_idr(rep1_peaks_filename, rep2_peaks_filename, pooled_peaks_filename,
     pooled_common_peaks_IDR_filename = \
         rep1_vs_rep2_prefix + ".pooled_common_IDRv2.narrowPeak"
     log_filename = rep1_vs_rep2_prefix + ".log.txt"
-    print "Files before calling IDR"
-    print subprocess.check_output('ls -la', shell=True)
-    print "Rep1 head"
-    print subprocess.check_output('head %s' % (rep1_peaks_filename), shell=True)
-    print "Rep2 head"
-    print subprocess.check_output('head %s' % (rep2_peaks_filename), shell=True)
-    print "Pool head"
-    print subprocess.check_output('head %s' % (pooled_peaks_filename), shell=True)
-    idr_command = ("idr "
-                   "--plot "
-                   "--use-best-multisummit-IDR "
-                   "--soft-idr-threshold %s "
-                   "--rank %s "
-                   "--output-file %s "
-                   "--log-output-file %s "
-                   "--peak-list %s "
-                   "--samples %s %s"
-                   % (idr_threshold,
-                      rank,
-                      pooled_common_peaks_IDR_filename,
-                      log_filename,
-                      pooled_peaks_filename,
-                      rep1_peaks_filename, rep2_peaks_filename))
-    print idr_command
-    process = subprocess.Popen(
-        shlex.split(idr_command),
-        stderr=subprocess.STDOUT,
-        stdout=subprocess.PIPE)
-    for line in iter(process.stdout.readline, ''):
-        sys.stdout.write(line)
-    print "Files after IDR"
-    print subprocess.check_output('ls -la', shell=True)
-    print "Head log %s" % (log_filename)
-    print subprocess.check_output(shlex.split('head %s' % (log_filename)))
-    print "Head peaks %s" % (pooled_common_peaks_IDR_filename)
-    print subprocess.check_output(shlex.split('head %s' % (pooled_common_peaks_IDR_filename)))
+    logger.info("Files before IDR\n%s"
+                % (subprocess.check_output('ls -la', shell=True)))
+    logger.info("Rep1 head\n%s"
+                % (subprocess.check_output(shlex.split('head %s' % (rep1_peaks_filename)))))
+    logger.info("Rep2 head\n%s"
+                % (subprocess.check_output(shlex.split('head %s' % (rep2_peaks_filename)))))
+    logger.info("Pool head\n%s"
+                % (subprocess.check_output(shlex.split('head %s' % (pooled_peaks_filename)))))
+
+    idr_command = ' '.join([
+        "idr --plot --use-best-multisummit-IDR",
+        "--soft-idr-threshold %s" % (idr_threshold),
+        "--rank %s" % (rank),
+        "--output-file %s" % (pooled_common_peaks_IDR_filename),
+        "--log-output-file %s" % (log_filename),
+        "--peak-list %s" % (pooled_peaks_filename),
+        "--samples %s %s" % (rep1_peaks_filename, rep2_peaks_filename)])
+    logger.info(idr_command)
+    idr_returncode = common.block_on(idr_command)
+    assert idr_returncode == 0, "IDR non-zero return %s" % (idr_returncode)
+
+    logger.info("Files after IDR\n%s"
+                % (subprocess.check_output('ls -la', shell=True)))
+    logger.info("Head log %s\n%s"
+                % (log_filename,
+                   subprocess.check_output(shlex.split('head %s' % (log_filename)))))
+    logger.info("Head peaks %s\n%s"
+                % (pooled_common_peaks_IDR_filename,
+                   subprocess.check_output(shlex.split('head %s' % (pooled_common_peaks_IDR_filename)))))
+
     return pooled_common_peaks_IDR_filename, None
 
 
@@ -112,23 +110,24 @@ def main(rep1_peaks, rep2_peaks, pooled_peaks, idr_threshold, rank):
     dxpy.download_dxfile(rep2_peaks_file.get_id(), rep2_peaks_filename)
     dxpy.download_dxfile(pooled_peaks_file.get_id(), pooled_peaks_filename)
 
-
     rep1_peaks_filename = common.uncompress(rep1_peaks_filename)
     rep2_peaks_filename = common.uncompress(rep2_peaks_filename)
     pooled_peaks_filename = common.uncompress(pooled_peaks_filename)
 
-    print subprocess.check_output('ls -l', shell=True, stderr=subprocess.STDOUT)
+    logger.info(subprocess.check_output('ls -l', shell=True, stderr=subprocess.STDOUT))
 
     rep1_vs_rep2_prefix = \
         '%sv%s.IDRv2' % (os.path.basename(rep1_peaks_filename)[0:11], os.path.basename(rep2_peaks_filename)[0:11])
 
-    pooled_common_peaks_IDR_filename, IDR_overlap_narrowpeak_filename = run_idr(
-        rep1_peaks_filename,
-        rep2_peaks_filename,
-        pooled_peaks_filename,
-        rep1_vs_rep2_prefix,
-        idr_threshold=idr_threshold,
-        rank=rank)
+    pooled_common_peaks_IDR_filename, IDR_overlap_narrowpeak_filename = \
+        run_idr(
+            rep1_peaks_filename,
+            rep2_peaks_filename,
+            pooled_peaks_filename,
+            rep1_vs_rep2_prefix,
+            idr_threshold=idr_threshold,
+            rank=rank
+        )
 
     # =============================
     # Get peaks passing the IDR threshold
@@ -137,10 +136,12 @@ def main(rep1_peaks, rep2_peaks, pooled_peaks, idr_threshold, rank):
     # peaks than if IDR were passed a cutoff directly
     # but the difference is relatively very small in comparison to the total
     # number of peaks
-    awk_string = r"""awk 'BEGIN{OFS="\t"} $12>=%2.2f {print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10}'""" % (-math.log10(idr_threshold))
-    final_IDR_thresholded_filename = rep1_vs_rep2_prefix + '.IDR%2.2f.narrowPeak' % (idr_threshold)
+    awk_string = \
+        r"""awk 'BEGIN{OFS="\t"} $12>=%2.2f {print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10}'""" % (-math.log10(idr_threshold))
+    final_IDR_thresholded_filename = \
+        rep1_vs_rep2_prefix + '.IDR%2.2f.narrowPeak' % (idr_threshold)
     common.run_pipe([
-        'cat %s' %(pooled_common_peaks_IDR_filename),
+        'cat %s' % (pooled_common_peaks_IDR_filename),
         awk_string,
         'sort -k7n,7n'
     ], final_IDR_thresholded_filename)
