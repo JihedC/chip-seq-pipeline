@@ -19,53 +19,7 @@ import shlex
 import sys
 import math
 import dxpy
-
-
-def run_pipe(steps, outfile=None, debug=True):
-    #break this out into a recursive function
-    #TODO:  capture stderr
-    from subprocess import Popen, PIPE
-
-    if debug:
-        logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
-    else: # use the defaulf logging level
-        logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
-
-    p = None
-    p_next = None
-    first_step_n = 1
-    last_step_n = len(steps)
-    for n,step in enumerate(steps, start=first_step_n):
-        #logging.info("step %d: %s" %(n,step))
-        print "step %d: %s" %(n,step)
-        if n == first_step_n:
-            if n == last_step_n and outfile: #one-step pipeline with outfile
-                with open(outfile, 'w') as fh:
-                    logging.info("one step shlex: %s to file: %s" %(shlex.split(step), outfile))
-                    p = Popen(shlex.split(step), stdout=fh)
-                break
-            #logging.info("first step shlex to stdout: %s" %(shlex.split(step)))
-            print "first step shlex to stdout: %s" %(shlex.split(step))
-            p = Popen(shlex.split(step), stdout=PIPE)
-            #need to close p.stdout here?
-        elif n == last_step_n and outfile: #only treat the last step specially if you're sending stdout to a file
-            with open(outfile, 'w') as fh:
-                #logging.info("last step shlex: %s to file: %s" %(shlex.split(step), outfile))
-                print "last step shlex: %s to file: %s" %(shlex.split(step), outfile)
-                p_last = Popen(shlex.split(step), stdin=p.stdout, stdout=fh)
-                p.stdout.close()
-                p = p_last
-        else: #handles intermediate steps and, in the case of a pipe to stdout, the last step
-            #logging.info("intermediate step %d shlex to stdout: %s" %(n,shlex.split(step)))
-            print "intermediate step %d shlex to stdout: %s" %(n,shlex.split(step))
-            p_next = Popen(shlex.split(step), stdin=p.stdout, stdout=PIPE)
-            p.stdout.close()
-            p = p_next
-    out,err = p.communicate()
-    if err:
-        #logging.warning(err)
-        print "stderr: %s" %(err)
-    return out,err
+import common
 
 
 def common_peaks(pooled_peaks_filename, rep1_peaks_filename, rep2_peaks_filename, pooled_common_peaks_filename):
@@ -73,7 +27,7 @@ def common_peaks(pooled_peaks_filename, rep1_peaks_filename, rep2_peaks_filename
     print rep1_peaks_filename
     print rep2_peaks_filename
     print pooled_common_peaks_filename
-    return run_pipe([
+    return common.run_pipe([
         'intersectBed -u -a %s -b %s' % (pooled_peaks_filename, rep1_peaks_filename),
         'intersectBed -u -a - -b %s' % (rep2_peaks_filename),
         'sort -k7n,7n -k1,1 -k2n,2n -k3n,3n -k10n,10n'
@@ -83,7 +37,7 @@ def common_peaks(pooled_peaks_filename, rep1_peaks_filename, rep2_peaks_filename
 
 def common_peaks_recalibrated(pooled_common_peaks_filename, rep_peaks_filename,
                               common_match_filename):
-    return run_pipe([
+    return common.run_pipe([
         'intersectBed -wa -wb -a %s -b %s' % (pooled_common_peaks_filename, rep_peaks_filename),
         r"""awk 'BEGIN{OFS="\t"}{d=$2+$10-$12-$20;$21=sqrt(d^2);print $0}'""",
         'groupBy -i - -g 1,2,3,10 -c 21 -o min -full',
@@ -91,31 +45,6 @@ def common_peaks_recalibrated(pooled_common_peaks_filename, rep_peaks_filename,
         r"""awk 'BEGIN{OFS="\t"}{print $1,$2+$10-2,$2+$10+2,$3,$4,$5,$6,$17,$18,$19,2}'"""
         # 'qzip -c'
     ], common_match_filename)
-
-
-def uncompress(filename):
-    m = re.match('(.*)(\.((gz)|(Z)|(bz)|(bz2)))', filename)
-    if m:
-        basename = m.group(1)
-        logging.info(subprocess.check_output(shlex.split('ls -l %s' % (filename))))
-        logging.info("Decompressing %s" % (filename))
-        logging.info(subprocess.check_output(shlex.split('gzip -d %s' % (filename))))
-        logging.info(subprocess.check_output(shlex.split('ls -l %s' % (basename))))
-        return basename
-    else:
-        return filename
-
-
-def compress(filename):
-    if re.match('(.*)(\.((gz)|(Z)|(bz)|(bz2)))',filename):
-        return filename
-    else:
-        logging.info(subprocess.check_output(shlex.split('ls -l %s' %(filename))))
-        logging.info("Compressing %s" %(filename))
-        logging.info(subprocess.check_output(shlex.split('gzip -n %s' %(filename))))
-        new_filename = filename + '.gz'
-        logging.info(subprocess.check_output(shlex.split('ls -l %s' %(new_filename))))
-        return new_filename
 
 
 def run_idr(rep1_peaks_filename, rep2_peaks_filename, pooled_peaks_filename,
@@ -184,9 +113,9 @@ def main(rep1_peaks, rep2_peaks, pooled_peaks, idr_threshold, rank):
     dxpy.download_dxfile(pooled_peaks_file.get_id(), pooled_peaks_filename)
 
 
-    rep1_peaks_filename = uncompress(rep1_peaks_filename)
-    rep2_peaks_filename = uncompress(rep2_peaks_filename)
-    pooled_peaks_filename = uncompress(pooled_peaks_filename)
+    rep1_peaks_filename = common.uncompress(rep1_peaks_filename)
+    rep2_peaks_filename = common.uncompress(rep2_peaks_filename)
+    pooled_peaks_filename = common.uncompress(pooled_peaks_filename)
 
     print subprocess.check_output('ls -l', shell=True, stderr=subprocess.STDOUT)
 
@@ -210,7 +139,7 @@ def main(rep1_peaks, rep2_peaks, pooled_peaks, idr_threshold, rank):
     # number of peaks
     awk_string = r"""awk 'BEGIN{OFS="\t"} $12>=%2.2f {print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10}'""" % (-math.log10(idr_threshold))
     final_IDR_thresholded_filename = rep1_vs_rep2_prefix + '.IDR%2.2f.narrowPeak' % (idr_threshold)
-    run_pipe([
+    common.run_pipe([
         'cat %s' %(pooled_common_peaks_IDR_filename),
         awk_string,
         'sort -k7n,7n'
@@ -242,9 +171,9 @@ def main(rep1_peaks, rep2_peaks, pooled_peaks, idr_threshold, rank):
     npeaks_pass = \
         dxpy.upload_local_file(npeaks_pass_filename)
     IDR_output = \
-        dxpy.upload_local_file(compress(pooled_common_peaks_IDR_filename))
+        dxpy.upload_local_file(common.compress(pooled_common_peaks_IDR_filename))
     IDR_peaks = \
-        dxpy.upload_local_file(compress(final_IDR_thresholded_filename))
+        dxpy.upload_local_file(common.compress(final_IDR_thresholded_filename))
 
     subprocess.check_output('ls -l', shell=True, stderr=subprocess.STDOUT)
 
