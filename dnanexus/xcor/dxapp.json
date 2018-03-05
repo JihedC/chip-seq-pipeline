@@ -82,6 +82,7 @@
     "runSpec": {
         "interpreter": "python2.7",
         "file": "src/xcor.py",
+        "distribution": "Ubuntu", "release": "14.04",
         "execDepends": [],
         "assetDepends": [
           {
