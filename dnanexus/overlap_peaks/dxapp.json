@@ -1,227 +1,227 @@
 {
-	"name": "overlap_peaks",
-	"title": "Overlap Peaks",
-	"summary": "Find peaks common to both replicates or both pooled pseudoreplicates",
-	"dxapi": "1.0.0",
-	"version": "0.0.1",
-	"categories": [
-		"ENCODE Analysis Pipeline"
-	],
-	"inputSpec": [
-		{
-			"name": "rep1_peaks",
-			"label": "First replicate peak file",
-			"class": "file",
-			"optional": false
-		},
-		{
-			"name": "rep2_peaks",
-			"label": "Second replicate peak file",
-			"class": "file",
-			"optional": false
-		},
-		{
-			"name": "pooled_peaks",
-			"label": "Pooled replicates peak file",
-			"class": "file",
-			"optional": false
-		},
-		{
-			"name": "pooledpr1_peaks",
-			"label": "Pooled pseudoreplicate 1 peaks",
-			"class": "file",
-			"optional": true
-		},
-		{
-			"name": "pooledpr2_peaks",
-			"label": "Pooled pseudoreplicate 2 peaks",
-			"class": "file",
-			"optional": true
-		},
-		{
-			"name": "rep1_ta",
-			"label": "Mapped reads for rep1",
-			"class": "file",
-			"optional": false
-		},
-		{
-			"name": "rep1_xcor",
-			"label": "Cross-correlation file for rep1",
-			"class": "file",
-			"optional": false
-		},
-		{
-			"name": "rep2_ta",
-			"label": "Mapped reads for rep2",
-			"class": "file",
-			"optional": true
-		},
-		{
-			"name": "rep2_xcor",
-			"label": "Cross-correlation file for rep2",
-			"class": "file",
-			"optional": true
-		},
+    "name": "overlap_peaks",
+    "title": "Overlap Peaks",
+    "summary": "Find peaks common to both replicates or both pooled pseudoreplicates",
+    "dxapi": "1.0.0",
+    "version": "0.0.1",
+    "categories": [
+        "ENCODE Analysis Pipeline"
+    ],
+    "inputSpec": [
+        {
+            "name": "rep1_peaks",
+            "label": "First replicate peak file",
+            "class": "file",
+            "optional": false
+        },
+        {
+            "name": "rep2_peaks",
+            "label": "Second replicate peak file",
+            "class": "file",
+            "optional": false
+        },
+        {
+            "name": "pooled_peaks",
+            "label": "Pooled replicates peak file",
+            "class": "file",
+            "optional": false
+        },
+        {
+            "name": "pooledpr1_peaks",
+            "label": "Pooled pseudoreplicate 1 peaks",
+            "class": "file",
+            "optional": true
+        },
+        {
+            "name": "pooledpr2_peaks",
+            "label": "Pooled pseudoreplicate 2 peaks",
+            "class": "file",
+            "optional": true
+        },
+        {
+            "name": "rep1_ta",
+            "label": "Mapped reads for rep1",
+            "class": "file",
+            "optional": false
+        },
+        {
+            "name": "rep1_xcor",
+            "label": "Cross-correlation file for rep1",
+            "class": "file",
+            "optional": false
+        },
+        {
+            "name": "rep2_ta",
+            "label": "Mapped reads for rep2",
+            "class": "file",
+            "optional": true
+        },
+        {
+            "name": "rep2_xcor",
+            "label": "Cross-correlation file for rep2",
+            "class": "file",
+            "optional": true
+        },
         {
             "name": "paired_end",
             "class": "boolean",
             "optional": false
         },
-		{
-			"name": "chrom_sizes",
-			"label": "chrom.sizes for bedToBigBed",
-			"class": "file",
-			"optional": false
-		},
-		{
-			"name": "as_file",
-			"label": ".as file for bedToBigBed",
-			"class": "file",
-			"optional": false
-		},
-		{
-			"name": "peak_type",
-			"label": "narrowPeak, gappedPeak, or broadPeak",
-			"class": "string",
-			"optional": false
-		},
-		{
-			"name": "prefix",
-			"label": "Filename prefix",
-			"class": "string",
-			"optional": true
-		},
-		{
-			"name": "rep1_signal",
-			"label": "First replicate signal track",
-			"class": "file",
-			"optional": true
-		},
-		{
-			"name": "rep2_signal",
-			"label": "Second replicate signal track",
-			"class": "file",
-			"optional": true
-		},
-		{
-			"name": "pooled_signal",
-			"label": "Pooled replicates signal",
-			"class": "file",
-			"optional": true
-		},
-		{
-			"name": "fragment_length",
-			"label": "Use this fragment length instead of the one calculated from xcor",
-			"class": "int",
-			"optional": true
-		}
-	],
-	"outputSpec": [
-		{
-			"name": "overlapping_peaks",
-			"label": "Overlapping peaks",
-			"class": "file"
-		},
-		{
-			"name": "overlapping_peaks_bb",
-			"label": "Overlapping peaks bigBed",
-			"class": "file"
-		},
-		{
-			"name": "rejected_peaks",
-			"label": "Rejected peaks",
-			"class": "file"
-		},
-		{
-			"name": "rejected_peaks_bb",
-			"label": "Rejected peaks bigBed",
-			"class": "file"
-		},
-		{
-			"name": "npeaks_in",
-			"label": "Number of peaks input",
-			"class": "int"
-		},
-		{
-			"name": "npeaks_out",
-			"label": "Number of peaks output",
-			"class": "int"
-		},
-		{
-			"name": "npeaks_rejected",
-			"label": "Number of peaks rejected",
-			"class": "int"
-		},
-		{
-			"name": "frip_nreads",
-			"label": "Number of reads in the pool",
-			"class": "int"
-		},
-		{
-			"name": "frip_nreads_in_peaks",
-			"label": "Number of pooled reads in peaks",
-			"class": "int"
-		},
-		{
-			"name": "frip_score",
-			"label": "FRiP score (fraction of reads in peaks)",
-			"class": "float"
-		},
-		{
-			"name": "rep1_signal",
-			"label": "First replicate signal track",
-			"class": "file",
-			"optional": true
-		},
-		{
-			"name": "rep2_signal",
-			"label": "Second replicate signal track",
-			"class": "file",
-			"optional": true
-		},
-		{
-			"name": "pooled_signal",
-			"label": "Pooled replicates signal",
-			"class": "file",
-			"optional": true
-		},
-		{
-			"name": "fragment_length_used",
-			"label": "Fragment length used",
-			"class": "int",
-			"optional": false
-		},
-		{
-			"name": "fragment_length_given_by_user",
-			"label": "Was the fragment length specified by user",
-			"class": "boolean",
-			"optional": false
-		}
-	],
-	"runSpec": {
-		"assetDepends":[
-		{
-      		"name": "bedtools_asset",
-	        "_comment": "ChIPv2-dev",
-	        "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
-	        "version": "0.0.1",
-	        "folder": "/ChIP-seq/assets/"
-    	},
-	    {
-	        "name": "common_asset",
+        {
+            "name": "chrom_sizes",
+            "label": "chrom.sizes for bedToBigBed",
+            "class": "file",
+            "optional": false
+        },
+        {
+            "name": "as_file",
+            "label": ".as file for bedToBigBed",
+            "class": "file",
+            "optional": false
+        },
+        {
+            "name": "peak_type",
+            "label": "narrowPeak, gappedPeak, or broadPeak",
+            "class": "string",
+            "optional": false
+        },
+        {
+            "name": "prefix",
+            "label": "Filename prefix",
+            "class": "string",
+            "optional": true
+        },
+        {
+            "name": "rep1_signal",
+            "label": "First replicate signal track",
+            "class": "file",
+            "optional": true
+        },
+        {
+            "name": "rep2_signal",
+            "label": "Second replicate signal track",
+            "class": "file",
+            "optional": true
+        },
+        {
+            "name": "pooled_signal",
+            "label": "Pooled replicates signal",
+            "class": "file",
+            "optional": true
+        },
+        {
+            "name": "fragment_length",
+            "label": "Use this fragment length instead of the one calculated from xcor",
+            "class": "int",
+            "optional": true
+        }
+    ],
+    "outputSpec": [
+        {
+            "name": "overlapping_peaks",
+            "label": "Overlapping peaks",
+            "class": "file"
+        },
+        {
+            "name": "overlapping_peaks_bb",
+            "label": "Overlapping peaks bigBed",
+            "class": "file"
+        },
+        {
+            "name": "rejected_peaks",
+            "label": "Rejected peaks",
+            "class": "file"
+        },
+        {
+            "name": "rejected_peaks_bb",
+            "label": "Rejected peaks bigBed",
+            "class": "file"
+        },
+        {
+            "name": "npeaks_in",
+            "label": "Number of peaks input",
+            "class": "int"
+        },
+        {
+            "name": "npeaks_out",
+            "label": "Number of peaks output",
+            "class": "int"
+        },
+        {
+            "name": "npeaks_rejected",
+            "label": "Number of peaks rejected",
+            "class": "int"
+        },
+        {
+            "name": "frip_nreads",
+            "label": "Number of reads in the pool",
+            "class": "int"
+        },
+        {
+            "name": "frip_nreads_in_peaks",
+            "label": "Number of pooled reads in peaks",
+            "class": "int"
+        },
+        {
+            "name": "frip_score",
+            "label": "FRiP score (fraction of reads in peaks)",
+            "class": "float"
+        },
+        {
+            "name": "rep1_signal",
+            "label": "First replicate signal track",
+            "class": "file",
+            "optional": true
+        },
+        {
+            "name": "rep2_signal",
+            "label": "Second replicate signal track",
+            "class": "file",
+            "optional": true
+        },
+        {
+            "name": "pooled_signal",
+            "label": "Pooled replicates signal",
+            "class": "file",
+            "optional": true
+        },
+        {
+            "name": "fragment_length_used",
+            "label": "Fragment length used",
+            "class": "int",
+            "optional": false
+        },
+        {
+            "name": "fragment_length_given_by_user",
+            "label": "Was the fragment length specified by user",
+            "class": "boolean",
+            "optional": false
+        }
+    ],
+    "runSpec": {
+        "assetDepends":[
+        {
+            "name": "bedtools_asset",
             "_comment": "ChIPv2-dev",
             "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
             "version": "0.0.1",
             "folder": "/ChIP-seq/assets/"
-  		}
-	],
-		"interpreter": "python2.7",
-		"file": "src/overlap_peaks.py"
-	},
-	"access": {
-		"network": [
-			"*"
-		]
-	},
-	"authorizedUsers": []
+        },
+        {
+            "name": "common_asset",
+            "_comment": "ChIPv2-dev",
+            "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
+            "version": "0.0.1",
+            "folder": "/ChIP-seq/assets/"
+        }
+    ],
+        "interpreter": "python2.7",
+        "file": "src/overlap_peaks.py"
+    },
+    "access": {
+        "network": [
+            "*"
+        ]
+    },
+    "authorizedUsers": []
 }
