@@ -5,7 +5,7 @@ DEFAULT_FOLDER='/ChIP-seq/'
 project=$1
 folder=${2:-$DEFAULT_FOLDER}
 
-ASSETS=('awscli_asset' 'bedtools_asset' 'bioconductor_asset' 'common_asset' 'filter_qc_asset' 'idr2_asset' 'macs2_asset' 'samtools_asset' 'spp_asset')
+ASSETS=('awscli_asset' 'bedtools_asset' 'bioconductor_asset' 'common_asset' 'filter_qc_asset' 'idr2_asset' 'macs2_asset' 'samtools_asset' 'spp_asset' 'ucsc_asset')
 dx mkdir -p "$project:$folder/assets/"
 
 for asset in ${ASSETS[@]}; do

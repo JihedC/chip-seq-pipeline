@@ -359,6 +359,13 @@
                 "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
                 "version": "0.0.1",
                 "folder": "/ChIP-seq/assets/"
+            },
+            {
+                "name": "ucsc_asset",
+                "_comment": "ChIPv2-dev",
+                "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
+                "version": "0.0.1",
+                "folder": "/ChIP-seq/assets/"
             }
     ],
         "systemRequirements": {
