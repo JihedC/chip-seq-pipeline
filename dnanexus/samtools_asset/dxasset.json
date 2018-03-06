@@ -1,6 +1,6 @@
 {
   "name": "samtools_asset",
-  "title": "samtools 1.6 Asset",
+  "title": "samtools",
   "description": "Everything to run samtools",
   "version": "0.0.1",
   "distribution": "Ubuntu",
