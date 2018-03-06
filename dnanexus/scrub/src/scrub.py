@@ -40,7 +40,7 @@ def scrub(in_filepath, out_filepath):
     header_path = os.path.join(dirname, "header.txt")
     sam_path = os.path.join(dirname, "scrubbed.sam")
     # Cache the header.
-    shell_command("samtools view -H %s -o %s" % (in_filepath, header_path))
+    shell_command("samtools view -H -o %s %s" % (header_path, in_filepath))
     # Scrub the sequence information from these fields:
     # 6 = CIGAR, 10 = query sequence, 11 = PHRED, and suppress optional tags
     # For example, unscrubbed read might look like:
@@ -54,7 +54,7 @@ def scrub(in_filepath, out_filepath):
     # Add back the header.
     common.run_pipe([
         'cat %s %s' % (header_path, sam_path),
-        'samtools view -S -b - -o %s' % (out_filepath)])
+        'samtools view -b -o %s -' % (out_filepath)])
     # Check the output.
     logger.debug("Output flagstat for %s" % (out_filepath))
     logger.debug(shell_command("samtools flagstat %s" % (out_filepath)))
