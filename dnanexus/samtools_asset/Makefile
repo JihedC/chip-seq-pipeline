@@ -4,7 +4,7 @@ all:
 	sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 	sudo rm -f /etc/apt/apt.conf.d/99dnanexus
 	# needed for samtools
-	apt-get install liblzma-dev
+	apt-get install liblzma-dev=5.1.1alpha+20120614-2ubuntu2
 	# samtools 0.1.19
 	# wget -nv https://github.com/samtools/samtools/archive/0.1.19.zip
 	# unzip 0.1.19.zip
