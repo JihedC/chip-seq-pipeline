@@ -5,7 +5,7 @@ DEFAULT_FOLDER='/ChIP-seq/'
 project=$1
 folder=${2:-$DEFAULT_FOLDER}
 
-ASSETS=('awscli_asset' 'bedtools_asset' 'bioconductor_asset' 'common_asset' 'macs2_asset' 'spp_asset' 'samtools_asset' 'filter_qc_asset')
+ASSETS=('awscli_asset' 'bedtools_asset' 'bioconductor_asset' 'common_asset' 'filter_qc_asset' 'idr2_asset' 'macs2_asset' 'samtools_asset' 'spp_asset')
 dx mkdir -p "$project:$folder/assets/"
 
 for asset in ${ASSETS[@]}; do
@@ -13,4 +13,3 @@ for asset in ${ASSETS[@]}; do
 	echo $dest >> $asset.log
 	dx build_asset --no-watch --destination "$project:$folder/assets/$asset" "$asset/" 1>> $asset.log 2>&1 &
 done
-
