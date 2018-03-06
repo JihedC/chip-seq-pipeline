@@ -3,16 +3,6 @@ SHELL=/bin/bash -e
 all:
 	sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 	sudo rm -f /etc/apt/apt.conf.d/99dnanexus
-	# needed for samtools
-	apt-get -q -y install liblzma-dev
-	# samtools 0.1.19
-	# wget -nv https://github.com/samtools/samtools/archive/0.1.19.zip
-	# unzip 0.1.19.zip
-	# cd samtools-0.1.19 && make && cp samtools /usr/local/bin
-	# samtools 1.2
-	wget -nv https://github.com/samtools/samtools/releases/download/1.2/samtools-1.2.tar.bz2
-	tar -xvf samtools-1.2.tar.bz2
-	cd samtools-1.2 && make && sudo make install
 	# needed for picard
 	apt-get -q -y install ant openjdk-6-jdk	
 	# picard 1.92

@@ -1,7 +1,7 @@
 {
-  "name": "filter_qc_asset",
-  "title": "filter_qc asset",
-  "description": "Everything to run filter_qc applet",
+  "name": "trimmomatic_asset",
+  "title": "Trimmomatic",
+  "description": "Trimmomatic 0.36 in assetbundle",
   "version": "0.0.1",
   "distribution": "Ubuntu",
   "instanceType": "mem3_hdd2_x2",
