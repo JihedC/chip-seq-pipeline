@@ -5,3 +5,4 @@ all:
 	sudo rm -f /etc/apt/apt.conf.d/99dnanexus
 	wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.36.zip
 	unzip Trimmomatic-0.36.zip
+	sudo cp -r Trimmomatic-0.36/ /trimmomatic
