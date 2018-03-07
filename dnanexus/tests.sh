@@ -3,7 +3,6 @@
 ## DCC-spinner tests
 # Map ECSR000EEB SE TF
 map_only ENCSR000EEB \
---debug \
 --assembly GRCh38 \
 --outf /test_runs/ENCSR000EEB-map_only-$(date +"%Y%m%d%H%M") \
 --key www \
@@ -11,7 +10,6 @@ map_only ENCSR000EEB \
 
 # Call peaks on ECSR000EEB SE TF
 call_chip_from_tas ENCSR000EEB \
---debug \
 --assembly GRCh38 \
 --inf "ENCODE - ChIP Production:/mapping_GRCh38/" \
 --outf /test_runs/ENCSR000EEB-call_chip_from_tas-$(date +"%Y%m%d%H%M") \
@@ -569,7 +567,6 @@ dx run \
 --input "bigbed=true" \
 --input "chrom_sizes=ENCODE Reference Files:/GRCh38/GRCh38_EBV.chrom.sizes" \
 --input "as_file=ENCODE Reference Files:/narrowPeak.as" \
---input 'spp_version=1.14' \
 --verbose \
 --destination /spp_test \
 --name spp_test_minimal \
@@ -585,7 +582,6 @@ dx run \
 --input "bigbed=true" \
 --input "chrom_sizes=ENCODE Reference Files:/GRCh38/GRCh38_EBV.chrom.sizes" \
 --input "as_file=ENCODE Reference Files:/narrowPeak.as" \
---input 'spp_version=1.14' \
 --verbose \
 --destination /spp_test \
 --name spp_test_full \
@@ -601,7 +597,6 @@ dx run \
 --input "bigbed=true" \
 --input "chrom_sizes=ENCODE Reference Files:/GRCh38/GRCh38_EBV.chrom.sizes" \
 --input "as_file=ENCODE Reference Files:/narrowPeak.as" \
---input 'spp_version=1.14' \
 --verbose \
 --destination /spp_test \
 --name spp_test_22 \

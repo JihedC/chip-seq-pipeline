@@ -42,25 +42,11 @@
       "class": "file"
     },
     {
-      "name": "bwa_version",
-      "label": "BWA version",
-      "class": "string",
-      "optional": true,
-      "default": "0.7.10"
-    },
-    {
       "name": "bwa_aln_params",
       "label": "Command-line parameters to BWA aln",
       "class": "string",
       "optional": true,
       "default": "-q 5 -l 32 -k 2"
-    },
-    {
-      "name": "samtools_version",
-      "label": "samtools version",
-      "class": "string",
-      "optional": true,
-      "default": "1.0"
     },
     {
       "name": "debug",

@@ -72,7 +72,6 @@ def get_args():
     # parser.add_argument('--idr', help="Run IDR. If not specified, run IDR for non-histone targets.", default=False, action='store_true')
     # parser.add_argument('--idrversion', help="IDR version (relevant only if --idr is specified", default="2")
     parser.add_argument('--dryrun', help="Formulate the run command, but don't actually run", default=False, action='store_true')
-    parser.add_argument('--spp_version', help="spp version", default="1.14")
     parser.add_argument('--spp_instance', help="Override the spp applet instance type", default=None)
     parser.add_argument('--control', help="Use specified control tagAlign rather than infer one.", default=None)
     parser.add_argument('--accession', help="Accession the results to the ENCODE Portal", default=False, action='store_true')
@@ -696,8 +695,7 @@ def main():
             '--rep1pe %s' % (str(rep1_pe).lower()),
             '--rep1 %s' % (tas['rep1_ta'].get('file_id')),
             '--ctl1 %s' % (tas['rep1_ta'].get('control_id')),
-            '--genomesize %s --chrom_sizes "%s"' % (genomesize, chrom_sizes),
-            '--spp_version %s' % (args.spp_version)
+            '--genomesize %s --chrom_sizes "%s"' % (genomesize, chrom_sizes)
         ]
 
         if not simplicate_experiment:

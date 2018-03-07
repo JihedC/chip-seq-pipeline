@@ -412,7 +412,7 @@ def build_workflow(experiment, biorep_n, input_shield_stage_input, read_length, 
 
     input_names = \
         [name for name in ['reads1', 'reads2', 'crop_length', 'reference_tar',
-         'bwa_version', 'bwa_aln_params', 'samtools_version', 'debug']
+         'bwa_aln_params', 'debug']
          if name in input_shield_stage_input]
     logging.debug('input_names: %s' % (input_names))
     mapping_stage_input = dict(zip(

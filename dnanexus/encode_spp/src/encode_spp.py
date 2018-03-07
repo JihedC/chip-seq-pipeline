@@ -22,7 +22,7 @@ logger.propagate = False
 logger.setLevel(logging.INFO)
 
 
-def spp(experiment, control, xcor_scores, chrom_sizes, spp_version,
+def spp(experiment, control, xcor_scores, chrom_sizes,
         bigbed=False, as_file=None, name="spp", prefix=None,
         fragment_length=None, spp_instance=None):
     spp_applet = \
@@ -37,8 +37,7 @@ def spp(experiment, control, xcor_scores, chrom_sizes, spp_version,
                  "control": control,
                  "xcor_scores_input": xcor_scores,
                  "bigbed": bigbed,
-                 "chrom_sizes": chrom_sizes,
-                 "spp_version": spp_version}
+                 "chrom_sizes": chrom_sizes}
     if fragment_length is not None:
         spp_input.update({"fragment_length": fragment_length})
     if bigbed and as_file:
@@ -57,7 +56,7 @@ def spp(experiment, control, xcor_scores, chrom_sizes, spp_version,
 
 @dxpy.entry_point('main')
 def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
-         npeaks, nodups,  chrom_sizes, spp_version,
+         npeaks, nodups,  chrom_sizes,
          rep2_ta=None, ctl2_ta=None, rep2_xcor=None, rep2_paired_end=None,
          as_file=None, idr_peaks=False, fragment_length=None, spp_instance=None):
 
@@ -176,7 +175,6 @@ def main(rep1_ta, ctl1_ta, rep1_xcor, rep1_paired_end,
 
     common_args = {
         'chrom_sizes': chrom_sizes,
-        'spp_version': spp_version,
         'as_file':     as_file,
         'spp_instance': spp_instance
         }

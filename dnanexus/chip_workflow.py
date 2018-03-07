@@ -226,10 +226,6 @@ def get_args():
         help='Run the workflow',
         default=False, action='store_true')
     parser.add_argument(
-        '--spp_version',
-        help="Version string for spp",
-        default="1.14")
-    parser.add_argument(
         '--spp_instance',
         help="Override the spp applet instance type",
         default=None)
@@ -589,8 +585,7 @@ def main():
                     folder=xcor_output_folder,
                     stage_input={
                         'input_bam': dxpy.dxlink({'stage': filter_qc_stage_id, 'outputField': 'filtered_bam'}),
-                        'paired_end': dxpy.dxlink({'stage': filter_qc_stage_id, 'outputField': 'paired_end'}),
-                        'spp_version': args.spp_version
+                        'paired_end': dxpy.dxlink({'stage': filter_qc_stage_id, 'outputField': 'paired_end'})
                     }
                 )
                 mapping_superstage.update({'xcor_stage_id': xcor_stage_id})
@@ -682,7 +677,7 @@ def main():
             # xcor_output_folder = resolve_folder(output_project, output_folder + '/' + xcor_only_applet.name)
             xcor_output_folder = xcor_only_applet.name
             xcor_only_stages = []
-            rep1_xcor_input = {'spp_version': args.spp_version}
+            rep1_xcor_input = {}
             if args.rep1pe is not None:
                 rep1_xcor_input.update({'paired_end': args.rep1pe})
             exp_rep1_cc_stage_id = workflow.add_stage(
@@ -702,7 +697,7 @@ def main():
                 {'stage': exp_rep1_cc_stage_id,
                  'inputField': 'input_tagAlign'})
             if not simplicate_experiment:
-                rep2_xcor_input = {'spp_version': args.spp_version}
+                rep2_xcor_input = {}
                 if args.rep2pe is not None:
                     rep2_xcor_input.update({'paired_end': args.rep2pe})
                 exp_rep2_cc_stage_id = workflow.add_stage(
@@ -782,7 +777,6 @@ def main():
                         'rep2_paired_end': rep2_paired_end,
                         'as_file': dxpy.dxlink(resolve_file(args.narrowpeak_as)),
                         'idr_peaks': True,
-                        'spp_version': args.spp_version,
                         'spp_instance': args.spp_instance
                         }
             if chrom_sizes:
