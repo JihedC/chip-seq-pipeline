@@ -242,7 +242,7 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
     # Index final bam file
     # new syntax: 
     samtools_index_command = \
-        "samtools index %s %s" % (final_bam_filename, final_bam_index_filename)
+        "samtools index %s" % (final_bam_filename)
     # old syntax:    "samtools index %s" % (final_bam_filename)
     logger.info(samtools_index_command)
     subprocess.check_call(shlex.split(samtools_index_command))
