@@ -591,23 +591,23 @@ def main():
                 mapping_superstage.update({'xcor_stage_id': xcor_stage_id})
 
         exp_rep1_ta = dxpy.dxlink(
-                    {'stage': next(ss.get('xcor_stage_id') for ss in mapping_superstages if ss['name'] == 'Rep1'),
+                    {'stage': next(ss.get('filter_qc_stage_id') for ss in mapping_superstages if ss['name'] == 'Rep1'),
                      'outputField': 'tagAlign_file'})
         exp_rep1_cc = dxpy.dxlink(
                     {'stage': next(ss.get('xcor_stage_id') for ss in mapping_superstages if ss['name'] == 'Rep1'),
                      'outputField': 'CC_scores_file'})
         rep1_paired_end = dxpy.dxlink(
-                        {'stage': next(ss.get('xcor_stage_id') for ss in mapping_superstages if ss['name'] == 'Rep1'),
+                        {'stage': next(ss.get('filter_qc_stage_id') for ss in mapping_superstages if ss['name'] == 'Rep1'),
                          'outputField': 'paired_end'})
         if not simplicate_experiment:
             exp_rep2_ta = dxpy.dxlink(
-                        {'stage': next(ss.get('xcor_stage_id') for ss in mapping_superstages if ss['name'] == 'Rep2'),
+                        {'stage': next(ss.get('filter_qc_stage_id') for ss in mapping_superstages if ss['name'] == 'Rep2'),
                          'outputField': 'tagAlign_file'})
             exp_rep2_cc = dxpy.dxlink(
                         {'stage': next(ss.get('xcor_stage_id') for ss in mapping_superstages if ss['name'] == 'Rep2'),
                          'outputField': 'CC_scores_file'})
             rep2_paired_end = dxpy.dxlink(
-                            {'stage': next(ss.get('xcor_stage_id') for ss in mapping_superstages if ss['name'] == 'Rep2'),
+                            {'stage': next(ss.get('filter_qc_stage_id') for ss in mapping_superstages if ss['name'] == 'Rep2'),
                              'outputField': 'paired_end'})
         else:
             exp_rep2_ta = None
@@ -615,11 +615,11 @@ def main():
             rep2_paired_end = None
 
         ctl_rep1_ta = dxpy.dxlink(
-                    {'stage': next(ss.get('xcor_stage_id') for ss in mapping_superstages if ss['name'] == 'Ctl1'),
+                    {'stage': next(ss.get('filter_qc_stage_id') for ss in mapping_superstages if ss['name'] == 'Ctl1'),
                      'outputField': 'tagAlign_file'})
         if not unary_control and not simplicate_experiment:
             ctl_rep2_ta = dxpy.dxlink(
-                        {'stage': next(ss.get('xcor_stage_id') for ss in mapping_superstages if ss['name'] == 'Ctl2'),
+                        {'stage': next(ss.get('filter_qc_stage_id') for ss in mapping_superstages if ss['name'] == 'Ctl2'),
                          'outputField': 'tagAlign_file'})
         else:
             ctl_rep2_ta = None
