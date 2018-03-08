@@ -265,6 +265,20 @@ dx run \
 --yes \
 /ChIP-seq/applets/xcor
 
+# Run xcor for SE ENCSR000EEB rep1 chr21 extract from unfiltered bam
+dx run \
+--input "input_bam=E3 ChIP-seq:test_data/encode_map_ENCSR000EEB-chr21/rep1-ENCFF000XTT.chr21.raw.srt.bam" \
+--input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GRCh38_chr21_bwa.tar.gz" \
+--input "paired_end=false" \
+--verbose \
+--destination /xcor_test/$(date +"%Y%m%d%H%M") \
+--name xcor_test_ENCSR000EEB_rep1_SE36_chr21_raw_bam \
+--delay-workspace-destruction \
+--priority high \
+--instance-type mem3_ssd1_x16 \
+--yes \
+/ChIP-seq/applets/xcor
+
 # Run xcor for SE ENCSR000EEB rep1 from full fastq
 dx run \
 --input "input_fastq=E3 ChIP-seq:/test_data/TF/ENCSR000EEB-hs-MAFK/rep1-ENCFF000XUL.fastq.gz" \
