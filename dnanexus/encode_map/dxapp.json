@@ -87,14 +87,12 @@
     "interpreter": "python2.7",
     "file": "src/encode_map.py",
     "distribution": "Ubuntu", "release": "14.04",
-    "execDepends": [
-      {"name": "openjdk-6-jdk"}
-    ],
+    "execDepends": [],
     "systemRequirements": {
       "main":        {"instanceType": "mem2_hdd2_x1"},
       "crop":        {"instanceType": "mem3_ssd1_x32"},
       "process":     {"instanceType": "mem3_ssd1_x32"},
-      "postprocess": {"instanceType": "mem3_hdd2_x2"}
+      "postprocess": {"instanceType": "mem3_hdd2_x4"}
     },
     "assetDepends": [
           {
