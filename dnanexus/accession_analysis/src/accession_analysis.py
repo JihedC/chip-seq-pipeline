@@ -55,7 +55,10 @@ DEPRECATED = ['deleted', 'replaced', 'revoked']
 # As seconds from the epoch
 VERSION_TIMES = {
     '1': 0,
-    '1.2': 1471460400  # "Wed Aug 17 12:00:00 2016"
+    '1.2': 1471460400,  # "Wed Aug 17 12:00:00 2016"
+    '1.3': 1498651200,  # Wednesday, June 28, 2017 12:00:00 PM
+    '1.4': 1520856000,  # Monday, March 12, 2018 12:00:00 PM
+    '2.0': 1527854400   # Friday, June 1, 2018 12:00:00 PM
 }
 STEP_VERSION_ALIASES = {
     'default': {
@@ -112,7 +115,87 @@ STEP_VERSION_ALIASES = {
         'tf-unreplicated-idr-step':                  'abd4401d-96aa-4c37-894d-8e0fee9273ec',
         'tf-unreplicated-peaks-to-bigbed-step':      'abcc5287-39ae-456a-b587-3af3fc202e00',
         'tf-unreplicated-idr-peaks-to-bigbed-step':  'fa044b11-91ff-4320-a212-5f98f9f7e165'
+    },
+    '1.3': {
+        'bwa-alignment-step':                      'dc6dac54-0a5f-4356-815c-975c4b052249',
+        'bwa-indexing-step':                       '58894736-6c6b-430a-ac19-4f86cede236a',
+        'bwa-raw-alignment-step':                  '353a6f3b-999c-4f01-84ce-5de9e83dab22',
 
+        'histone-peak-calling-step':               '',
+        'histone-overlap-peaks-step':              '06a53965-b1b1-4d2c-999f-189c10716096',
+        'histone-peaks-to-bigbed-step':            'a7d5cbf0-c9f8-446a-9db8-a50b443e6628',
+        'histone-replicated-peaks-to-bigbed-step': 'b67cd935-d665-4ba7-bf34-17273db5451e',
+
+        'histone-unreplicated-peak-calling-step':                           '',
+        'histone-unreplicated-partition-concordance-step':                  'fb4a04ac-a13c-4a6f-86b0-f4781e7e2232',
+        'histone-unreplicated-peaks-to-bigbed-step':                        '2b8daae2-cdf6-41b1-bcd5-6ce99b0970d2',
+        'histone-unreplicated-partition-concordance-peaks-to-bigbed-step':  'db3b685c-8462-49b8-a29c-5f6b180a9294',
+
+        'tf-macs2-signal-calling-step':            '',
+        'tf-spp-peak-calling-step':                '63326924-00a7-414f-ba7d-923c0f25da92',
+        'tf-idr-step':                             'ad55c9a7-76f4-483d-9feb-ff47c067c523',
+        'tf-peaks-to-bigbed-step':                 '511ba3d7-4b15-49a8-901e-c7516f3312c5',
+        'tf-idr-peaks-to-bigbed-step':             '30b7cd3c-55fd-42c2-8175-19bc98d58752',
+
+        'tf-unreplicated-macs2-signal-calling-step': '',
+        'tf-unreplicated-spp-peak-calling-step':     '48d55aea-f922-4102-b93e-a57c4af26f6c',
+        'tf-unreplicated-idr-step':                  'abd4401d-96aa-4c37-894d-8e0fee9273ec',
+        'tf-unreplicated-peaks-to-bigbed-step':      'abcc5287-39ae-456a-b587-3af3fc202e00',
+        'tf-unreplicated-idr-peaks-to-bigbed-step':  'fa044b11-91ff-4320-a212-5f98f9f7e165'
+    },
+    '1.4': {
+        'bwa-alignment-step':                      'dc6dac54-0a5f-4356-815c-975c4b052249',
+        'bwa-indexing-step':                       '58894736-6c6b-430a-ac19-4f86cede236a',
+        'bwa-raw-alignment-step':                  '353a6f3b-999c-4f01-84ce-5de9e83dab22',
+
+        'histone-peak-calling-step':               '',
+        'histone-overlap-peaks-step':              '',
+        'histone-peaks-to-bigbed-step':            'a7d5cbf0-c9f8-446a-9db8-a50b443e6628',
+        'histone-replicated-peaks-to-bigbed-step': 'b67cd935-d665-4ba7-bf34-17273db5451e',
+
+        'histone-unreplicated-peak-calling-step':                           '',
+        'histone-unreplicated-partition-concordance-step':                  '',
+        'histone-unreplicated-peaks-to-bigbed-step':                        '2b8daae2-cdf6-41b1-bcd5-6ce99b0970d2',
+        'histone-unreplicated-partition-concordance-peaks-to-bigbed-step':  'db3b685c-8462-49b8-a29c-5f6b180a9294',
+
+        'tf-macs2-signal-calling-step':            '',
+        'tf-spp-peak-calling-step':                '63326924-00a7-414f-ba7d-923c0f25da92',
+        'tf-idr-step':                             '',
+        'tf-peaks-to-bigbed-step':                 '511ba3d7-4b15-49a8-901e-c7516f3312c5',
+        'tf-idr-peaks-to-bigbed-step':             '30b7cd3c-55fd-42c2-8175-19bc98d58752',
+
+        'tf-unreplicated-macs2-signal-calling-step': '',
+        'tf-unreplicated-spp-peak-calling-step':     '48d55aea-f922-4102-b93e-a57c4af26f6c',
+        'tf-unreplicated-idr-step':                  '',
+        'tf-unreplicated-peaks-to-bigbed-step':      'abcc5287-39ae-456a-b587-3af3fc202e00',
+        'tf-unreplicated-idr-peaks-to-bigbed-step':  'fa044b11-91ff-4320-a212-5f98f9f7e165'
+    },
+    '2.0': {
+        'bwa-alignment-step':                      '',
+        'bwa-indexing-step':                       '58894736-6c6b-430a-ac19-4f86cede236a',
+        'bwa-raw-alignment-step':                  '',
+
+        'histone-peak-calling-step':               '',
+        'histone-overlap-peaks-step':              '',
+        'histone-peaks-to-bigbed-step':            '',
+        'histone-replicated-peaks-to-bigbed-step': '',
+
+        'histone-unreplicated-peak-calling-step':                           '',
+        'histone-unreplicated-partition-concordance-step':                  '',
+        'histone-unreplicated-peaks-to-bigbed-step':                        '',
+        'histone-unreplicated-partition-concordance-peaks-to-bigbed-step':  '',
+
+        'tf-macs2-signal-calling-step':            '',
+        'tf-spp-peak-calling-step':                '',
+        'tf-idr-step':                             '',
+        'tf-peaks-to-bigbed-step':                 '',
+        'tf-idr-peaks-to-bigbed-step':             '',
+
+        'tf-unreplicated-macs2-signal-calling-step': '',
+        'tf-unreplicated-spp-peak-calling-step':     '',
+        'tf-unreplicated-idr-step':                  '',
+        'tf-unreplicated-peaks-to-bigbed-step':      '',
+        'tf-unreplicated-idr-peaks-to-bigbed-step':  ''
     }
 }
 
