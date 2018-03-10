@@ -156,7 +156,7 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
             # out to specified filename
             # Will produce name sorted BAM
             # new syntax:
-            "samtools sort -@ %d -n -o %s" % (cpu_count(), tmp_filt_bam_filename)])
+            "samtools sort -@ %d -n -O bam -T presort -o %s -" % (cpu_count(), tmp_filt_bam_filename)])
             # old syntax: "samtools sort -n - %s" % (tmp_filt_bam_prefix)])
         if err:
             logger.error("samtools error: %s" % (err))
@@ -176,7 +176,7 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
             "samtools view -F 1804 -f 2 -u -",
             # produce the coordinate-sorted BAM
             # new syntax:
-            "samtools sort -@ %d -o %s" % (cpu_count(), filt_bam_filename)])
+            "samtools sort -@ %d -O bam -T finalsort -o %s -" % (cpu_count(), filt_bam_filename)])
             # old syntax: "samtools sort - %s" % (filt_bam_prefix)])
         subprocess.check_call('ls -l', shell=True)
     else:  # single-end data
@@ -230,7 +230,7 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
     # ============================
     if paired_end:
         samtools_dedupe_command = \
-            "samtools view -F 1804 -f2 -b %s" % (filt_bam_filename)
+            "samtools view -F 1804 -f 2 -b %s" % (filt_bam_filename)
     else:
         samtools_dedupe_command = \
             "samtools view -F 1804 -b %s" % (filt_bam_filename)
@@ -240,7 +240,7 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
             shlex.split(samtools_dedupe_command),
             stdout=fh)
     # Index final bam file
-    # new syntax: 
+    # new syntax:
     samtools_index_command = \
         "samtools index %s" % (final_bam_filename)
     # old syntax:    "samtools index %s" % (final_bam_filename)
@@ -272,7 +272,7 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
     if paired_end:
         steps = [
             # new syntax:
-            "samtools sort -@ %d -n %s" % (cpu_count(), filt_bam_filename),
+            "samtools sort -@ %d -O bam -T pbcsort -n %s" % (cpu_count(), filt_bam_filename),
             # old syntax: "samtools sort -no %s -" % (filt_bam_filename),
             "bamToBed -bedpe -i stdin",
             r"""awk 'BEGIN{OFS="\t"}{print $1,$2,$4,$6,$9,$10}'"""]
@@ -315,7 +315,7 @@ def main(input_bam, paired_end, samtools_params, scrub, debug):
         final_nmsrt_bam_prefix = final_bam_prefix + ".nmsrt"
         final_nmsrt_bam_filename = final_nmsrt_bam_prefix + ".bam"
         samtools_sort_command = \
-            "samtools sort -n -@ %d -o %s %s" % (cpu_count(), final_nmsrt_bam_filename, final_bam_filename)
+            "samtools sort -@ %d -n -o %s -T bedpesort %s" % (cpu_count(), final_nmsrt_bam_filename, final_bam_filename)
             # old syntax: "samtools sort -n %s %s" % (final_bam_filename, final_nmsrt_bam_prefix)
         logger.info(samtools_sort_command)
         subprocess.check_call(shlex.split(samtools_sort_command))

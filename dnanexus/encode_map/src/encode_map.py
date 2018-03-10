@@ -240,9 +240,9 @@ def postprocess(indexed_reads, unmapped_reads, reference_tar, debug):
                reads_filename, unmapped_reads_filename)]
 
     steps.extend([
-        "%s view -@%d -Su -"
+        "%s view -@ %d -"
         % (SAMTOOLS_PATH, cpu_count()),
-        "%s sort -@%d - %s"
+        "%s sort -@ %d -O bam -T rawsort -o %s -"
         % (SAMTOOLS_PATH, cpu_count(), raw_bam_filename.rstrip('.bam'))])  # samtools adds .bam
 
     logger.info("Running pipe: %s" % (steps))
@@ -407,5 +407,6 @@ def main(reads1, crop_length, hard_crop, reference_tar,
     }
     logger.info("Exiting with output: %s" % (output))
     return output
+
 
 dxpy.run()
