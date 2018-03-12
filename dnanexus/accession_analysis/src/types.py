@@ -52,7 +52,6 @@ class EncodedObject(Base):
         else:
             self._encode_repr = {}
 
-
     @property
     def uuid(self):
         return self._encode_repr.get('uuid')
@@ -70,19 +69,22 @@ class EncodedObject(Base):
         return self._encode_repr.get('status')
 
     def search_by_field(self, field, value):
-        logger.info('Searching ENCODE for %s with %s=%s' % (self.name, field, value))
+        logger.info('Searching ENCODE for {} with {}={}'.format(self.name, field, value))
         url = '/search/?type=%s&%s=%s' % (self.name, field, value)
-        result = self.make_request(url)
+        result = self.make_get_request(url)
         return result.get('@graph', [])
+
+    def get_by_id(self, field, value, datastore='elasticsearch'):
+        logger.info('Getting from ENCODE for {} with {}={}'.format(self.name, field, value))
+        if field in ['uuid', 'accession', '@id']
+            result = self.make_get_request(value)
+            return result
+        else:
+            raise ValueError('field value must be unique identifier in ENCODED')
 
     def get_encoded_obj(self, **kwargs):
         field, value = kwargs.popitem()
-        result = []
-        if field in ['@id', 'uuid', 'accession']:
-            result = self.search_by_field(field, value)
-        if len(result) == 1:
-            return result[0]
-        return {}
+        return self.get_by_id(field, value)
 
 
 class File(EncodedObject):
@@ -93,6 +95,7 @@ class File(EncodedObject):
     def post(self):
         self.make_post_request()
 
+
 class Experiment(EncodedObject):
     """docstring for Experiment"""
     def __init__(self, data=None, **kwargs):
@@ -100,6 +103,13 @@ class Experiment(EncodedObject):
         
     def post(self):
         self.make_post_request()
+
+class Stages(object):
+    """docstring for Stages"""
+    def __init__(self, arg):
+        super(Stages, self).__init__()
+        self.arg = arg
+        
 
 
 class Analysis(object):
@@ -123,8 +133,8 @@ class Analysis(object):
             re.search('(ENCSR[0-9]{3}[A-Z]{3})', self.analysis_object['name'])
 
         if not (m_executableName or m_name):
-            logger.error("No experiment accession in name %s or executableName %s."
-                         % (self.analysis_object['name'], self.analysis_object['executableName']))
+            logger.error("No experiment accession in name {} or executableName {}.".format(
+                            self.analysis_object['name'], self.analysis_object['executableName']))
             return
         elif (m_executableName and m_name):
             executableName_accession = m_executableName.group(1)
@@ -133,14 +143,13 @@ class Analysis(object):
                 return executableName_accession
             else:
                 logger.error(
-                    'Different experiment accessions: name %s, executableName %s.'
-                    % (self.analysis_object['name'], self.analysis_object['executableName']))
+                    'Different experiment accessions: name {}, executableName {}.'.format(
+                        self.analysis_object['name'], self.analysis_object['executableName']))
                 return None
         else:
             m = (m_executableName or m_name)
             experiment_accession = m.group(1)
-            logger.debug("get_experiment_accession returning %s"
-                         % (experiment_accession))
+            logger.debug("get_experiment_accession returning {}".format(experiment_accession))
             return experiment_accession
     
     @property
@@ -152,7 +161,7 @@ class Analysis(object):
     @property
     def is_unary_control(self):
         return analysis['properties'].get('unary_control') in ['True', 'true']
-        
+
 
 
 
