@@ -6,6 +6,9 @@ import dxpy
 import common
 import re
 
+from cached_property import cached_property
+
+
 SERVER = ''
 KEYPAIR = ''
 
@@ -48,7 +51,7 @@ class EncodedObject(Base):
         self.name = self.__class__.__name__
         if kwargs:
             self._encode_repr = self.get_encoded_obj(kwargs)
-            logger.info('Initialed {} with unique identifier'.format(self.name))
+            logger.info('Initialized {} with unique identifier'.format(self.name))
         else:
             self._encode_repr = {}
 
@@ -69,14 +72,16 @@ class EncodedObject(Base):
         return self._encode_repr.get('status')
 
     def search_by_field(self, field, value):
-        logger.info('Searching ENCODE for {} with {}={}'.format(self.name, field, value))
+        logger.info('Searching ENCODE for {} with {}={}'.format(
+                        self.name, field, value))
         url = '/search/?type=%s&%s=%s' % (self.name, field, value)
         result = self.make_get_request(url)
         return result.get('@graph', [])
 
     def get_by_id(self, field, value, datastore='elasticsearch'):
-        logger.info('Getting from ENCODE for {} with {}={}'.format(self.name, field, value))
-        if field in ['uuid', 'accession', '@id']
+        logger.info('Getting from ENCODE for {} with {}={}'.format(
+                        self.name, field, value))
+        if field in ['uuid', 'accession', 'id']
             result = self.make_get_request(value)
             return result
         else:
@@ -95,14 +100,49 @@ class File(EncodedObject):
     def post(self):
         self.make_post_request()
 
+    @property
+    def format(self):
+        return self._encode_repr.get('file_format', None)
+
+    @property
+    def biological_replicate_number(self):
+        replicate = self._encode_repr.get('replicate', {}):
+        if replicate:
+            return replicate.get('biological_replicate_number')
+        return None
+            
 
 class Experiment(EncodedObject):
     """docstring for Experiment"""
     def __init__(self, data=None, **kwargs):
         super().__init__(data, kwargs)
+        self.files = []
+        self.initialize_files()
         
     def post(self):
         self.make_post_request()
+
+    @cached_property
+    def files(self):
+        files = []
+        for file_id in self._encode_repr.get('original_files', []):
+            files.append(File(id=file_id))
+        return files
+
+    @cached_property
+    def fastqs(self):
+        status = ['released', 'in progress', 'uploaded']
+        formats = ['fastq', 'fasta']
+        fastqs = []
+        for file in self.files:
+            if file.format in formats and file.status in statuses:
+                fastqs.append(file)
+        return fastqs
+
+    def fastq_replicates_by_number(self, number):
+        return [file for file in self.fastqs if 
+                    file.biological_replicate_number == number]
+
 
 class Stages(object):
     """docstring for Stages"""
