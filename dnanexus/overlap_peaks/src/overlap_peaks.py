@@ -62,8 +62,14 @@ def internal_pseudoreplicate_overlap(rep1_peaks, rep2_peaks, pooled_peaks,
     # Download file inputs to the local file system with local filenames
 
     dxpy.download_dxfile(rep1_peaks_file.get_id(), rep1_peaks_fn)
+    rep1_peaks_dc_fn = common.uncompress(rep1_peaks_fn)
+
     dxpy.download_dxfile(rep2_peaks_file.get_id(), rep2_peaks_fn)
+    rep2_peaks_dc_fn = common.uncompress(rep2_peaks_fn)
+
     dxpy.download_dxfile(pooled_peaks_file.get_id(), pooled_peaks_fn)
+    pooled_peaks_dc_fn = common.uncompress(pooled_peaks_fn)
+
     dxpy.download_dxfile(rep1_ta_file.get_id(), rep1_ta_fn)
     dxpy.download_dxfile(rep1_xcor_file.get_id(), rep1_xcor_fn)
     dxpy.download_dxfile(chrom_sizes_file.get_id(), chrom_sizes_fn)
@@ -91,11 +97,11 @@ def internal_pseudoreplicate_overlap(rep1_peaks, rep2_peaks, pooled_peaks,
     # Find pooled peaks that overlap Rep1 and Rep2 where overlap is defined as
     # the fractional overlap wrt any one of the overlapping peak pairs  > 0.5
     out, err = common.run_pipe([
-        'intersectBed -wo -a %s -b %s' % (pooled_peaks_fn, rep1_peaks_fn),
+        'intersectBed -wo -a %s -b %s' % (pooled_peaks_dc_fn, rep1_peaks_dc_fn),
         awk_command,
         cut_command,
         'sort -u',
-        'intersectBed -wo -a stdin -b %s' % (rep2_peaks_fn),
+        'intersectBed -wo -a stdin -b %s' % (rep2_peaks_dc_fn),
         awk_command,
         cut_command,
         'sort -u'
@@ -116,7 +122,7 @@ def internal_pseudoreplicate_overlap(rep1_peaks, rep2_peaks, pooled_peaks,
 
     # rejected peaks
     out, err = common.run_pipe([
-        'intersectBed -wa -v -a %s -b %s' % (pooled_peaks_fn, overlapping_peaks_fn)
+        'intersectBed -wa -v -a %s -b %s' % (pooled_peaks_dc_fn, overlapping_peaks_fn)
         ], rejected_peaks_fn)
     print("%d peaks were rejected" % (common.count_lines(rejected_peaks_fn)))
 
