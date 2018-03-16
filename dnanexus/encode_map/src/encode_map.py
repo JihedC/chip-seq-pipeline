@@ -240,10 +240,10 @@ def postprocess(indexed_reads, unmapped_reads, reference_tar, debug):
                reads_filename, unmapped_reads_filename)]
 
     steps.extend([
-        "%s view -@ %d -"
+        "%s view -@ %d -u -"
         % (SAMTOOLS_PATH, cpu_count()),
         "%s sort -@ %d -O bam -T rawsort -o %s -"
-        % (SAMTOOLS_PATH, cpu_count(), raw_bam_filename.rstrip('.bam'))])  # samtools adds .bam
+        % (SAMTOOLS_PATH, cpu_count(), raw_bam_filename)])
 
     logger.info("Running pipe: %s" % (steps))
     out, err = common.run_pipe(steps)
