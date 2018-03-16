@@ -65,7 +65,7 @@ chip_workflow.py \
 --rep1 "E3 ChIP-seq:/test_data/TF/ENCSR000EEB-hs-MAFK/rep1-chr21.fq.gz" \
 --rep2 "E3 ChIP-seq:/test_data/TF/ENCSR000EEB-hs-MAFK/rep2-chr21.fq.gz" \
 --ctl1 "E3 ChIP-seq:/test_data/TF/ENCSR000EEB-hs-MAFK/ctl1-chr21.fq.gz" \
---reference "ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GCA_000001405.15_GRCh38_no_alt_analysis_set.bwa.tar.gz" \
+--reference "ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GRCh38_chr21_bwa.tar.gz" \
 --chrom_sizes "ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/GRCh38_EBV.chrom.sizes" \
 --blacklist "ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/blacklists/GRCh38.blacklist.bed.gz" \
 --genomesize hs \
@@ -82,7 +82,7 @@ chip_workflow.py \
 --rep1 "E3 ChIP-seq:/test_data/TF/ENCSR000EEB-hs-MAFK/rep1-chr21.tagAlign.gz" \
 --rep2 "E3 ChIP-seq:/test_data/TF/ENCSR000EEB-hs-MAFK/rep2-chr21.tagAlign.gz" \
 --ctl1 "E3 ChIP-seq:/test_data/TF/ENCSR000EEB-hs-MAFK/ctl1-chr21.tagAlign.gz" \
---reference "ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GCA_000001405.15_GRCh38_no_alt_analysis_set.bwa.tar.gz" \
+--reference "ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GRCh38_chr21_bwa.tar.gz" \
 --chrom_sizes "ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/GRCh38_EBV.chrom.sizes" \
 --blacklist "ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/blacklists/GRCh38.blacklist.bed.gz" \
 --genomesize hs \
@@ -136,8 +136,8 @@ dx run \
 --input "reads1=ENCODE Uniform Processing Pipelines:/ChIP-seq/test_data/hMAFK-ENCSR000EEB/rep1-ENCFF000XTT.chr21.fq.gz" \
 --input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GRCh38_chr21_bwa.tar.gz" \
 --verbose \
---destination /encode_map_test/test_$(date +"%Y%m%d%H%M") \
---name encode_map_test \
+--destination /encode_map_test/ENCSR000EEB_r1_chr21_$(date +"%Y%m%d%H%M") \
+--name encode_map_ENCSR000EEB_r1_chr21_$(date +"%Y%m%d%H%M") \
 --delay-workspace-destruction \
 --priority high \
 --yes \
@@ -146,12 +146,12 @@ dx run \
 
 # Run ENCODE_map on 36 bp SE chr21 extract, crop to 25 bp
 dx run \
---input "reads1=ENCODE Uniform Processing Pipelines:/ChIP-seq/test_data/ENCSR000EEB-hMAFK/R1-ENCFF000XTT.chr21.fq.gz" \
---input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.bwa.tar.gz" \
+--input "reads1=ENCODE Uniform Processing Pipelines:/ChIP-seq/test_data/hMAFK-ENCSR000EEB/rep1-ENCFF000XTT.chr21.fq.gz" \
+--input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GRCh38_chr21_bwa.tar.gz" \
 --input "crop_length=25" \
 --verbose \
---destination /encode_map_test/test_$(date +"%Y%m%d%H%M") \
---name encode_map_test \
+--destination /encode_map_test/ENCSR000EEB_r1_chr21_crop25_$(date +"%Y%m%d%H%M") \
+--name encode_map_ENCSR000EEB_r1_chr21_crop25_$(date +"%Y%m%d%H%M") \
 --delay-workspace-destruction \
 --priority high \
 --yes \
@@ -162,7 +162,7 @@ dx run \
 dx run \
 --input "reads1=/test_data/TF/ENCSR155KHM-hs-ARNT/rep1-R1-ENCFF109UIV.fastq.gz" \
 --input "reads2=/test_data/TF/ENCSR155KHM-hs-ARNT/rep1-R2-ENCFF748SHJ.fastq.gz" \
---input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GRCh38_chr21_bwa.tar.gz" \
+--input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GCA_000001405.15_GRCh38_no_alt_analysis_set.bwa.tar.gz" \
 --verbose \
 --destination /encode_map_test/test_$(date +"%Y%m%d%H%M") \
 --name encode_map_test \
@@ -176,7 +176,7 @@ dx run \
 dx run \
 --input "reads1=/test_data/TF/ENCSR155KHM-hs-ARNT/rep1-R1-ENCFF109UIV.fastq.gz" \
 --input "reads2=/test_data/TF/ENCSR155KHM-hs-ARNT/rep1-R2-ENCFF748SHJ.fastq.gz" \
---input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GRCh38_chr21_bwa.tar.gz" \
+--input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GCA_000001405.15_GRCh38_no_alt_analysis_set.bwa.tar.gz" \
 --input "crop_length=36" \
 --verbose \
 --destination /encode_map_test/test_$(date +"%Y%m%d%H%M") \
@@ -186,20 +186,45 @@ dx run \
 --yes \
 /ChIP-seq/applets/encode_map
 
+# Run ENCODE_map on ENCSR502NRF rep1 100 bp PE
+dx run \
+--input "reads1=E3 ChIP-seq:/test_map_only_regression/fastqs/ENCSR502NRF/rep1/ENCFF071LVJ.fastq.gz" \
+--input "reads2=E3 ChIP-seq:/test_map_only_regression/fastqs/ENCSR502NRF/rep1/ENCFF932LBZ.fastq.gz" \
+--input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GCA_000001405.15_GRCh38_no_alt_analysis_set.bwa.tar.gz" \
+--verbose \
+--destination /encode_map_test/ENCSR502NRF_r1_$(date +"%Y%m%d%H%M") \
+--name encode_map_ENCSR502NRF_r1_$(date +"%Y%m%d%H%M") \
+--delay-workspace-destruction \
+--priority high \
+--yes \
+/ChIP-seq/applets/encode_map
 
-# Run ENCODE_map on ENCSR502NRF rep1 PE chr19
+# Run ENCODE_map on ENCSR502NRF rep1 100 bp PE chr19
 dx run \
 --input "reads1=E3 ChIP-seq:/test_data/TF/ENCSR502NRF-PE/ENCFF071LVJ-chr19.fastq.gz" \
 --input "reads2=E3 ChIP-seq:/test_data/TF/ENCSR502NRF-PE/ENCFF932LBZ-chr19.fastq.gz" \
---input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GRCh38_chr21_bwa.tar.gz" \
+--input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GCA_000001405.15_GRCh38_no_alt_analysis_set.bwa.tar.gz" \
 --verbose \
---destination /encode_map_test/test_ENCSR502NRF_r1_chr19_$(date +"%Y%m%d%H%M") \
+--destination /encode_map_test/ENCSR502NRF_r1_chr19_$(date +"%Y%m%d%H%M") \
 --name encode_map_ENCSR502NRF_r1_chr19_$(date +"%Y%m%d%H%M") \
 --delay-workspace-destruction \
 --priority high \
 --yes \
 /ChIP-seq/applets/encode_map
 
+# Run ENCODE_map on ENCSR502NRF rep1 100 bp PE chr19 crop50
+dx run \
+--input "reads1=E3 ChIP-seq:/test_data/TF/ENCSR502NRF-PE/ENCFF071LVJ-chr19.fastq.gz" \
+--input "reads2=E3 ChIP-seq:/test_data/TF/ENCSR502NRF-PE/ENCFF932LBZ-chr19.fastq.gz" \
+--input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GCA_000001405.15_GRCh38_no_alt_analysis_set.bwa.tar.gz" \
+--input "crop_length=50" \
+--verbose \
+--destination /encode_map_test/ENCSR502NRF_r1_chr19_crop50_$(date +"%Y%m%d%H%M") \
+--name encode_map_ENCSR502NRF_r1_chr19_crop50_$(date +"%Y%m%d%H%M") \
+--delay-workspace-destruction \
+--priority high \
+--yes \
+/ChIP-seq/applets/encode_map
 
 # filter_qc on ENCSR000EEB SE
 dx run \
@@ -225,6 +250,18 @@ dx run \
 --yes \
 /ChIP-seq/applets/filter_qc
 
+# filter_qc on ENCSR502NRF PE chr19
+dx run \
+--input "paired_end=true" \
+--input "input_bam=E3 ChIP-seq:/test_data/TF/ENCSR502NRF-PE/ENCFF071LVJ-chr19ENCFF932LBZ-chr19.raw.srt.bam" \
+--verbose \
+--destination /filter_qc_test/test_$(date +"%Y%m%d%H%M") \
+--name filter_qc_test_ENCSR502NRF_PE_chr19 \
+--delay-workspace-destruction \
+--priority high \
+--yes \
+/ChIP-seq/applets/filter_qc
+
 # filter_qc on ENCSR155KHM 100 bp PE
 dx run \
 --input "paired_end=true" \
@@ -237,14 +274,14 @@ dx run \
 --yes \
 /ChIP-seq/applets/filter_qc
 
-# Run xcor for SE ENCSR000EEB rep1
+# Run xcor for SE ENCSR000EEB rep1 from tagAlign
 dx run \
 --input "input_tagAlign=E3 ChIP-seq:/reference_analyses/GRCh38/bams/ENCSR000EEB/rep1/ENCFF000XUL.raw.srt.filt.nodup.srt.SE.tagAlign.gz" \
---input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GRCh38_chr21_bwa.tar.gz" \
+--input "reference_tar=ENCODE Uniform Processing Pipelines:/Reference Files/GRCh38/ChIP-seq/GCA_000001405.15_GRCh38_no_alt_analysis_set.bwa.tar.gz" \
 --input "paired_end=false" \
 --verbose \
---destination /xcor_test/$(date +"%Y%m%d%H%M") \
---name xcor_test_ENCSR000EEB_rep1_SE36 \
+--destination /xcor_test/ENCSR000EEB_r1_SE36_$(date +"%Y%m%d%H%M") \
+--name xcor_test_ENCSR000EEB_r1_SE36_$(date +"%Y%m%d%H%M") \
 --delay-workspace-destruction \
 --priority high \
 --instance-type mem3_ssd1_x16 \
