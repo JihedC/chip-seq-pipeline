@@ -8,6 +8,13 @@ map_only ENCSR000EEB \
 --key www \
 --yes
 
+# Map ENCSR203KEU PE histone
+map_only ENCSR203KEU \
+--assembly GRCh38 \
+--outf /test_runs/ENCSR203KEU-map_only-$(date +"%Y%m%d%H%M") \
+--key www \
+--yes
+
 # Call peaks on ECSR000EEB SE TF
 call_chip_from_tas ENCSR000EEB \
 --assembly GRCh38 \
