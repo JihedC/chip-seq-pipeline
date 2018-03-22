@@ -257,8 +257,7 @@ def pooled(files):
 
 @dxpy.entry_point('main')
 def main(reads1, reads2, crop_length, reference_tar,
-         bwa_aln_params, bwa_version, samtools_version,
-         keyfile, debug, key=None):
+         bwa_aln_params, keyfile, debug, key=None):
 
     # reads1 and reads2 are expected to be an arrays of file identifiers
     # indentifiers can be DNAnexus files or ENCODE file accession numbers
@@ -329,8 +328,6 @@ def main(reads1, reads2, crop_length, reference_tar,
         "reference_tar": reference_tar_file,
         "crop_length": crop_length,
         "bwa_aln_params": bwa_aln_params,
-        "bwa_version": bwa_version,
-        "samtools_version": samtools_version,
         "debug": debug
     }
     if reads2_file:

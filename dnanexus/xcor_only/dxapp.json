@@ -19,12 +19,6 @@
             "class": "boolean",
             "optional": true,
             "default": true
-        },
-        {
-          "name": "spp_version",
-          "label": "The version of SPP to use",
-          "class": "string",
-          "default": "1.14"
         }
     ],
     "outputSpec": [
@@ -62,6 +56,7 @@
     "runSpec": {
         "interpreter": "python2.7",
         "file": "src/xcor_only.py",
+        "distribution": "Ubuntu", "release": "14.04",
         "systemRequirements": {
             "main": {"instanceType": "mem3_hdd2_x2"}
         },
@@ -89,6 +84,13 @@
             },
             {
                 "name": "spp_asset",
+                "_comment": "ChIPv2-dev",
+                "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
+                "version": "0.0.1",
+                "folder": "/ChIP-seq/assets/"
+            },
+            {
+                "name": "samtools_asset",
                 "_comment": "ChIPv2-dev",
                 "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
                 "version": "0.0.1",

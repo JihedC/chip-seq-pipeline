@@ -32,7 +32,7 @@ logger.setLevel(logging.INFO)
 
 @dxpy.entry_point('main')
 def main(experiment, control, xcor_scores_input, npeaks, nodups, bigbed,
-         chrom_sizes, spp_version, as_file=None, prefix=None,
+         chrom_sizes, as_file=None, prefix=None,
          fragment_length=None):
 
     # The following line(s) initialize your data object inputs on the platform
@@ -87,10 +87,6 @@ def main(experiment, control, xcor_scores_input, npeaks, nodups, bigbed,
         fraglen = int(round(sum(frag_lens) / len(frag_lens)))
         logger.info("Fragment length %s" % (fraglen))
 
-    # spp_tarball = SPP_VERSION_MAP.get(spp_version)
-    # assert spp_tarball, "spp version %s is not supported" % (spp_version)
-    # install spp
-    # subprocess.check_output(shlex.split('R CMD INSTALL %s' % (spp_tarball)))
     run_spp = '/phantompeakqualtools/run_spp.R'
     spp_command = (
         "Rscript %s -p=%d -c=%s -i=%s -npeak=%d -speak=%s -savr=%s -savp=%s -rf -out=%s"

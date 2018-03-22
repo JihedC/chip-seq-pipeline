@@ -1,7 +1,7 @@
 {
-  "name": "bedtools_asset",
-  "title": "Bedtools",
-  "description": "Bedtools 2.26 in assetbundle",
+  "name": "bwa_asset",
+  "title": "bwa_asset",
+  "description": "Everything to run BWA",
   "version": "0.0.1",
   "distribution": "Ubuntu",
   "instanceType": "mem3_hdd2_x2",

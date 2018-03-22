@@ -42,25 +42,11 @@
       "class": "file"
     },
     {
-      "name": "bwa_version",
-      "label": "BWA version",
-      "class": "string",
-      "optional": true,
-      "default": "0.7.10"
-    },
-    {
       "name": "bwa_aln_params",
       "label": "Command-line parameters to BWA aln",
       "class": "string",
       "optional": true,
       "default": "-q 5 -l 32 -k 2"
-    },
-    {
-      "name": "samtools_version",
-      "label": "samtools version",
-      "class": "string",
-      "optional": true,
-      "default": "1.0"
     },
     {
       "name": "debug",
@@ -100,18 +86,45 @@
   "runSpec": {
     "interpreter": "python2.7",
     "file": "src/encode_map.py",
-    "execDepends": [
-      {"name": "openjdk-6-jdk"}
-    ],
+    "distribution": "Ubuntu", "release": "14.04",
+    "execDepends": [],
     "systemRequirements": {
       "main":        {"instanceType": "mem2_hdd2_x1"},
       "crop":        {"instanceType": "mem3_ssd1_x32"},
       "process":     {"instanceType": "mem3_ssd1_x32"},
-      "postprocess": {"instanceType": "mem3_hdd2_x2"}
+      "postprocess": {"instanceType": "mem3_hdd2_x4"}
     },
     "assetDepends": [
           {
             "name": "common_asset",
+            "_comment": "ChIPv2-dev",
+            "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
+            "version": "0.0.1",
+            "folder": "/ChIP-seq/assets/"
+          },
+          {
+            "name": "bedtools_asset",
+            "_comment": "ChIPv2-dev",
+            "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
+            "version": "0.0.1",
+            "folder": "/ChIP-seq/assets/"
+          },
+          {
+            "name": "samtools_asset",
+            "_comment": "ChIPv2-dev",
+            "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
+            "version": "0.0.1",
+            "folder": "/ChIP-seq/assets/"
+          },
+          {
+            "name": "trimmomatic_asset",
+            "_comment": "ChIPv2-dev",
+            "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
+            "version": "0.0.1",
+            "folder": "/ChIP-seq/assets/"
+          },
+          {
+            "name": "bwa_asset",
             "_comment": "ChIPv2-dev",
             "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
             "version": "0.0.1",

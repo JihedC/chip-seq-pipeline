@@ -60,12 +60,6 @@
       "optional": true
     },
     {
-      "name": "spp_version",
-      "label": "The version of SPP to use",
-      "class": "string",
-      "default": "1.14"
-    },
-    {
       "name": "prefix",
       "label": "Basename for output files",
       "class": "string",
@@ -104,6 +98,7 @@
   "runSpec": {
     "interpreter": "python2.7",
     "file": "src/spp.py",
+    "distribution": "Ubuntu", "release": "14.04",
     "systemRequirements": {
       "main":     {"instanceType": "mem3_ssd1_x4"}
     },
@@ -136,6 +131,13 @@
       },
       {
         "name": "spp_asset",
+        "_comment": "ChIPv2-dev",
+        "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
+        "version": "0.0.1",
+        "folder": "/ChIP-seq/assets/"
+      },
+      {
+        "name": "ucsc_asset",
         "_comment": "ChIPv2-dev",
         "project": "project-FB3YPP00jjb547qG1V9Y0Q9Y",
         "version": "0.0.1",

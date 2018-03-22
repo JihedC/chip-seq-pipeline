@@ -1,7 +1,7 @@
 {
-  "name": "bedtools_asset",
-  "title": "Bedtools",
-  "description": "Bedtools 2.26 in assetbundle",
+  "name": "picard_asset",
+  "title": "Picard",
+  "description": "Everything to run picard",
   "version": "0.0.1",
   "distribution": "Ubuntu",
   "instanceType": "mem3_hdd2_x2",

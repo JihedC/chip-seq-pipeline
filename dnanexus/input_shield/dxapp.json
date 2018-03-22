@@ -43,20 +43,6 @@
       "default": "-q 5 -l 32 -k 2"
     },
     {
-      "name": "bwa_version",
-      "label": "BWA version",
-      "class": "string",
-      "optional": true,
-      "default": "0.7.10"
-    },
-    {
-      "name": "samtools_version",
-      "label": "samtools version",
-      "class": "string",
-      "optional": true,
-      "default": "1.0"
-    },
-    {
       "name": "key",
       "class": "string",
       "optional": true
@@ -103,16 +89,6 @@
       "class": "string"
     },
     {
-      "name": "bwa_version",
-      "label": "BWA version",
-      "class": "string"
-    },
-    {
-      "name": "samtools_version",
-      "label": "samtools version",
-      "class": "string"
-    },
-    {
       "name": "debug",
       "label": "debug mode",
       "class": "boolean"
@@ -121,6 +97,7 @@
   "runSpec": {
     "interpreter": "python2.7",
     "file": "src/input_shield.py",
+    "distribution": "Ubuntu", "release": "14.04",
     "execDepends": [
     ],
     "assetDepends": [

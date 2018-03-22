@@ -75,12 +75,6 @@
             "optional": false
         },
         {
-          "name": "spp_version",
-          "label": "The version of SPP to use",
-          "class": "string",
-          "default": "1.14"
-        },
-        {
             "name": "as_file",
             "label": ".as file for bedToBigBed",
             "class": "file",
@@ -216,6 +210,7 @@
     "runSpec": {
         "interpreter": "python2.7",
         "file": "src/encode_spp.py",
+        "distribution": "Ubuntu", "release": "14.04",
         "assetDepends":[
             {
                 "name": "common_asset",

@@ -3,15 +3,16 @@ SHELL=/bin/bash -e
 all:
 	sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 	sudo rm -f /etc/apt/apt.conf.d/99dnanexus
-	apt-get install liblzma-dev
+	# needed for samtools
+	sudo apt-get -y install liblzma-dev=5.1.1alpha+20120614-2ubuntu2
 	# samtools 0.1.19
-	wget -nv https://github.com/samtools/samtools/archive/0.1.19.zip
-	unzip 0.1.19.zip
-	cd samtools-0.1.19 && make && cp samtools /usr/local/bin
+	# wget -nv https://github.com/samtools/samtools/archive/0.1.19.zip
+	# unzip 0.1.19.zip
+	# cd samtools-0.1.19 && make && cp samtools /usr/local/bin
 	# samtools 1.2
-	# wget -nv https://github.com/samtools/samtools/releases/download/1.2/samtools-1.2.tar.bz2
-	# tar -xvf samtools-1.2.tar.bz2
-	# cd samtools-1.2 && make && sudo make install
+	wget -nv https://github.com/samtools/samtools/releases/download/1.2/samtools-1.2.tar.bz2
+	tar -xvf samtools-1.2.tar.bz2
+	cd samtools-1.2 && make && sudo make install
 	# samtools 1.6
 	# wget https://github.com/samtools/samtools/releases/download/1.6/samtools-1.6.tar.bz2
 	# tar -xvf samtools-1.6.tar.bz2
