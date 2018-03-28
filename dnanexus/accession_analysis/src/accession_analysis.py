@@ -601,6 +601,58 @@ def idr_quality_metric(step_run, stages, files):
     return [obj]
 
 
+def histone_chipseq_quality_metric(step_run, stages, files):
+    logger.debug(
+        "in histone_chipseq_quality_metric with "
+        "step_run %s stages.keys() %s output files %s"
+        % (step_run, stages.keys(), files))
+
+    file_accessions = list(set(flat([
+        resolve_name_to_accessions(stages, output_name)
+        for output_name in files])))
+
+    histone_overlap_stage_output = \
+        stages['Final narrowpeaks']['stage_metadata']['output']
+
+    obj = {
+        # 'assay_term_id':     'OBI:0000716',
+        'assay_term_name':   'ChIP-seq',
+        'step_run':          step_run,
+        'quality_metric_of': file_accessions,
+    }
+
+    if not histone_overlap_stage_output.get('rep1_signal'):
+        raise AccessioningError(
+            "Expected stage 'Final narrowpeaks' to have rep1_signal output.  Found these outputs:\n%s"
+            % (histone_overlap_stage_output.keys()))
+    replicated_analysis = all([
+        histone_overlap_stage_output.get(s) for s in [
+            'rep1_signal',
+            'rep2_signal']
+        ])
+    logger.debug("replicated_analysis %s" % (replicated_analysis))
+    qc_data_mapping_DX_ENCODE = {
+        'frip_score': ('Ft' if replicated_analysis else 'F1', float),
+        'frip_nreads': ('nreads', int),
+        'frip_nreads_in_peaks': ('nreads_in_peaks', int),
+        'npeaks_out': ('npeak_overlap', int)
+    }
+
+    for dx_output_name, encode_property in qc_data_mapping_DX_ENCODE.iteritems():
+        # Only accession FRiP scores if calculated
+        encode_property_name = encode_property[0]
+        encode_property_type = encode_property[1]
+        if histone_overlap_stage_output.get(dx_output_name):
+            obj.update({
+                encode_property_name:
+                    encode_property_type(histone_overlap_stage_output[dx_output_name])
+            })
+
+    obj.update(COMMON_METADATA)
+
+    return [obj]
+
+
 def dxf_md5(dx_fh):
     logger.debug(
         "in dxf_md5 with handler %s with name %s"
@@ -866,16 +918,13 @@ def get_raw_mapping_stages(mapping_analysis, keypair, server, fqcheck, repn):
         stage for stage in analysis_stages
         if stage['name'].startswith("Map ENCSR"))
     filter_qc_stage = next(
-        stage for stage in analysis_stages
-        if stage['name'].startswith("Filter and QC"))
-    scrubbed = scrubbed_stage(filter_qc_stage)
-
-    # if filter_qc_stage['input'].get('scrub') == 'true':
-    #     bam = dxpy.describe(
-    #         filter_qc_stage['output']['scrubbed_unfiltered_bam'])
-    # else:
-    #     bam = dxpy.describe(
-    #         raw_mapping_stage['output']['scrubbed_unfiltered_bam'])
+        (stage for stage in analysis_stages
+         if stage['name'].startswith("Filter and QC")), None)
+    if filter_qc_stage:
+        scrubbed = any([scrubbed_stage(stage) for stage in analysis_stages])
+    else:
+        scrubbed = False
+    logger.debug('scrubbed is %s' % (scrubbed))
     crop_length = raw_mapping_stage['output'].get('crop_length')
 
     if not crop_length or crop_length == 'native':
@@ -922,7 +971,7 @@ def get_raw_mapping_stages(mapping_analysis, keypair, server, fqcheck, repn):
 
     bam_metadata = common.merge_dicts({
         'file_format': 'bam',
-        'output_type': 'unfiltered alignments',
+        'output_type': 'unfiltered alignments' if not scrubbed else 'redacted unfiltered alignments',
         'assembly': reference.get('assembly'),
         'mapped_read_length': mapped_read_length
     }, COMMON_METADATA)
@@ -1091,9 +1140,7 @@ def get_mapping_stages(mapping_analysis, keypair, server, fqcheck, repn):
     filter_qc_stage = next(
         stage for stage in analysis_stages
         if stage['name'].startswith("Filter and QC"))
-    scrubbed = scrubbed_stage(filter_qc_stage)
-
-    # bam = dxpy.describe(filter_qc_stage['output']['scrubbed_filtered_bam'])
+    scrubbed = any([scrubbed_stage(stage) for stage in analysis_stages])
     crop_length = raw_mapping_stage['output'].get('crop_length')
 
     if not crop_length or crop_length == 'native':
@@ -1140,7 +1187,7 @@ def get_mapping_stages(mapping_analysis, keypair, server, fqcheck, repn):
 
     bam_metadata = common.merge_dicts({
         'file_format': 'bam',
-        'output_type': 'alignments',
+        'output_type': 'alignments' if not scrubbed else 'redacted alignments',
         'mapped_read_length': mapped_read_length,
         'assembly': reference.get('assembly')
     }, COMMON_METADATA)
@@ -1384,13 +1431,6 @@ def get_histone_peak_stages(peaks_analysis, mapping_stages, control_stages,
         'experiment %s and len(mapping_stages) %d len(control_stages) %d'
         % (experiment['accession'], len(mapping_stages), len(control_stages)))
     unreplicated_analysis = is_unreplicated_analysis(peaks_analysis)
-
-    # experiment_scrubbed = any(
-    #     [scrubbed_stage(stage) for stage in
-    #      [mapping_stage.get(stage_name).get('stage_metadata') for mapping_stage in mapping_stages for stage_name in mapping_stage.keys()]])
-    # control_scrubbed = any(
-    #     [scrubbed_stage(stage) for stage in
-    #      [mapping_stage.get(stage_name).get('stage_metadata') for mapping_stage in control_stages for stage_name in mapping_stage.keys()]])
 
     bams = \
         [(mapping_stage,
@@ -1646,13 +1686,6 @@ def get_tf_peak_stages(peaks_analysis, mapping_stages, control_stages,
         'experiment %s and len(mapping_stages) %d len(control_stages) %d'
         % (experiment['accession'], len(mapping_stages), len(control_stages)))
     unreplicated_analysis = is_unreplicated_analysis(peaks_analysis)
-
-    # experiment_scrubbed = any(
-    #     [scrubbed_stage(stage) for stage in
-    #      [mapping_stage.get(stage_name).get('stage_metadata') for mapping_stage in mapping_stages for stage_name in mapping_stage.keys()]])
-    # control_scrubbed = any(
-    #     [scrubbed_stage(stage) for stage in
-    #      [mapping_stage.get(stage_name).get('stage_metadata') for mapping_stage in control_stages for stage_name in mapping_stage.keys()]])
 
     bams = \
         [(mapping_stage,
@@ -2156,7 +2189,8 @@ def qckiller(f, server, keypair):
     QC_OBJECS_TO_KILL = [
         'chipseq_filter_quality_metric',
         'samtools_flagstats_quality_metric',
-        'idr_quality_metric']
+        'idr_quality_metric',
+        'histone_chipseq_quality_metric']
 
     for object_type in QC_OBJECS_TO_KILL:
         url = \
@@ -2893,7 +2927,7 @@ def accession_raw_mapping_analysis_files(
     raw_mapping_stages = get_raw_mapping_stages(
         mapping_analysis, keypair, server, fqcheck, repn)
 
-    scrubbed = any([scrubbed_stage(stage.get('stage_metadata')) for stage in raw_mapping_stages])
+    scrubbed = any([scrubbed_stage(stage) for stage in analysis_stages])
     unfiltered_bam = \
         'scrubbed_unfiltered_bam' if scrubbed else 'mapped_reads'
 
@@ -3027,33 +3061,11 @@ def accession_histone_analysis_files(peaks_analysis, keypair, server, dryrun,
             files_with_derived.extend(
                 patch_outputs(stages, keypair, server, dryrun))
 
+    replicated_peaks_filename = 'overlapping_peaks'
+    replicated_peaks_bb_filename = 'overlapping_peaks_bb'
+
     full_analysis_step_versions = {
-        # STEP_VERSION_ALIASES[pipeline_version]['bwa-indexing-step']: [
-        #     {
-        #         'stages': "",
-        #         'stage_name': "",
-        #         'file_names': [],
-        #         'status': 'released',
-        #         'qc_objects': []
-        #     }
-        # ],
-        # STEP_VERSION_ALIASES[pipeline_version]['bwa-alignment-step']: [
-        #     {
-        #         'stages': mapping_stage,
-        #         'stage_name':
-        #             next(stage_name
-        #                  for stage_name in mapping_stage.keys()
-        #                  if stage_name.startswith('Filter and QC')),
-        #         'file_names': [filtered_bam_output_name(mapping_stage)],
-        #         'status': 'released',
-        #         'qc_objects': [
-        #             {'chipseq_filter_quality_metric':
-        #                 [filtered_bam_output_name(mapping_stage)]},
-        #             {'samtools_flagstats_quality_metric':
-        #                 [filtered_bam_output_name(mapping_stage)]}]
-        #     } for mapping_stage in (mapping_stages if skip_control else
-        #                             mapping_stages + control_stages)
-        # ],
+
         STEP_VERSION_ALIASES[pipeline_version][
             'histone-unreplicated-peak-calling-step'
             if unreplicated_analysis else
@@ -3083,9 +3095,9 @@ def accession_histone_analysis_files(peaks_analysis, keypair, server, dryrun,
                     stage_name
                     for stage_name in peak_stage.keys()
                     if re.match('(Overlap|Final) narrowpeaks', stage_name)),
-                'file_names': ['overlapping_peaks'],
+                'file_names': [replicated_peaks_filename],
                 'status': 'released',
-                'qc_objects': []
+                'qc_objects': [{'histone_chipseq_quality_metric': [replicated_peaks_filename]}]
             } for peak_stage in peak_stages
         ],
         STEP_VERSION_ALIASES[pipeline_version][
@@ -3101,7 +3113,7 @@ def accession_histone_analysis_files(peaks_analysis, keypair, server, dryrun,
                     ] if unreplicated_analysis else [
                      'rep1_narrowpeaks_bb', 'rep2_narrowpeaks_bb',
                      'pooled_narrowpeaks_bb'],
-                'status': 'virtual',
+                'status': 'released',
                 'qc_objects': []
             } for peak_stage in peak_stages
         ],
@@ -3115,9 +3127,9 @@ def accession_histone_analysis_files(peaks_analysis, keypair, server, dryrun,
                     stage_name
                     for stage_name in peak_stage.keys()
                     if re.match('(Overlap|Final) narrowpeaks', stage_name)),
-                'file_names': ['overlapping_peaks_bb'],
-                'status': 'virtual',
-                'qc_objects': []
+                'file_names': [replicated_peaks_bb_filename],
+                'status': 'released',
+                'qc_objects': [{'histone_chipseq_quality_metric': [replicated_peaks_bb_filename]}]
             } for peak_stage in peak_stages
         ]
     }
@@ -3281,7 +3293,7 @@ def accession_tf_analysis_files(peaks_analysis, keypair, server, dryrun,
                 'stages': peak_stage,
                 'stage_name': 'SPP Peaks',
                 'file_names': peaks_bb_filenames,
-                'status': 'virtual',
+                'status': 'released',
                 'qc_objects': []
             } for peak_stage in peak_stages
         ],
@@ -3293,7 +3305,7 @@ def accession_tf_analysis_files(peaks_analysis, keypair, server, dryrun,
                 'stages': peak_stage,
                 'stage_name': 'Final IDR peak calls',
                 'file_names': idr_bb_filenames,
-                'status': 'virtual',
+                'status': 'released',
                 'qc_objects': [{'idr_quality_metric': idr_bb_filenames}]
             } for peak_stage in peak_stages
         ]
