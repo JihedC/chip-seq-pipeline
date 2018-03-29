@@ -17,6 +17,7 @@
     "runSpec": {
         "interpreter": "python2.7",
         "file": "src/shell.py",
+        "distribution": "Ubuntu", "release": "14.04",
         "execDepends": [
             {"name": "samtools",
              "package_manager": "git",
@@ -26,20 +27,20 @@
              "build_commands": "make samtools && cp /tmp/samtools/samtools /usr/local/bin/samtools"}
         ],
         "assetDepends": [
-          {"name": "bioconductorAsset",
-           "project": "project-F4Kv2280g45x6ZyFFj8FJgxZ",
+          {"name": "bioconductor_asset",
+           "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
            "version": "0.0.1",
            "folder": "/ChIP-seq/assets/" 
           },
           {
             "name": "bedtools_asset",
-            "project": "project-F4Kv2280g45x6ZyFFj8FJgxZ",
+            "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
             "version": "0.0.1",
             "folder": "/ChIP-seq/assets/"
           },
           {
             "name": "common_asset",
-            "project": "project-F4Kv2280g45x6ZyFFj8FJgxZ",
+            "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
             "version": "0.0.1",
             "folder": "/ChIP-seq/assets/"
           }

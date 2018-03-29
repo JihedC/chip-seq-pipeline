@@ -5,6 +5,7 @@ import sys
 import dxpy
 import json
 from collections import OrderedDict
+import shutil
 
 try:
     project = dxpy.DXProject(sys.argv[1])
@@ -43,13 +44,25 @@ applets = [
 ]
 
 for applet in applets:
-    fh = open("%s/dxapp.json" % (applet), 'r')
+    infile_path = "%s/dxapp.json" % (applet)
+    bufile_path = "%s/dxapp-bu.json" % (applet)
+    outfile_path = "%s/dxapp.json" % (applet)
+    infh = open(infile_path, 'r')
     try:
-        dxapp_json = json.load(fh, object_pairs_hook=OrderedDict)
+        dxapp_json = json.load(infh, object_pairs_hook=OrderedDict)
     except ValueError:
-        print("Cannot interpret JSON in %s/dxapp.json" % (applet))
+        print("Cannot interpret JSON in %s/dxapp.json" % (applet), file=sys.stderr)
         sys.exit(1)
     asset_depends = dxapp_json['runSpec']['assetDepends']
     for asset in asset_depends:
         asset.update(project=project.get_id())
-    print(json.dumps(dxapp_json, indent=4, separators=(',', ': ')))
+    # test to make sure serialization works before destroying the dxapp.json file
+    try:
+        s = json.dumps(dxapp_json, indent=4, separators=(',', ': '))
+    except:
+        print("Cannot serialize new JSON", file=sys.stderr)
+        sys.exit(1)
+    infh.close()
+    shutil.copyfile(infile_path, bufile_path)
+    out_fh = open(outfile_path, 'w+')
+    json.dump(dxapp_json, out_fh, indent=4, separators=(',', ': '))

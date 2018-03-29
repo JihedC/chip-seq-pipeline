@@ -1,147 +1,149 @@
 {
-  "name": "accession_analysis",
-  "title": "Accession analysis",
-  "summary": "accession_analysis",
-  "dxapi": "1.0.0",
-  "version": "0.0.1",
-  "categories": [
-    "ENCODE Analysis Pipeline"
-  ],
-  "inputSpec": [
-    {
-      "name": "analysis_ids",
-      "class": "array:string",
-      "optional": true
-    },
-    {
-      "name": "infile",
-      "class": "file",
-      "optional": true
-    },
-    {
-      "name": "outfn",
-      "class": "string",
-      "optional": true,
-      "default": "accession_analysis.csv"
-    },
-    {
-      "name": "debug",
-      "class": "boolean",
-      "optional": true,
-      "default": false
-    },
-    {
-      "name": "project",
-      "class": "string",
-      "optional": true
-    },
-    {
-      "name": "pipeline",
-      "class": "string",
-      "optional": true
-    },
-    {
-      "name": "key",
-      "class": "string",
-      "optional": true
-    },
-    {
-      "name": "keyfile",
-      "class": "string",
-      "optional": true,
-      "default": "keypairs.json"
-    },
-    {
-      "name": "dryrun",
-      "class": "boolean",
-      "optional": true,
-      "default": false
-    },
-    {
-      "name": "force_patch",
-      "class": "boolean",
-      "optional": true,
-      "default": false
-    },
-    {
-      "name": "force_upload",
-      "class": "boolean",
-      "optional": true,
-      "default": false
-    },
-    {
-      "name": "use_content_md5sum",
-      "class": "boolean",
-      "optional": true,
-      "default": false
-    },
-    {
-      "name": "fqcheck",
-      "class": "boolean",
-      "optional": true,
-      "default": false
-    },
-    {
-      "name": "accession_raw",
-      "class": "boolean",
-      "optional": true,
-      "default": true
-    },
-    {
-      "name": "signal_only",
-      "class": "boolean",
-      "optional": true,
-      "default": false
-    },
-    {
-      "name": "skip_control",
-      "class": "boolean",
-      "optional": true,
-      "default": false
-    },
-    {
-      "name": "wait_on_files",
-      "class": "array:file",
-      "optional": true
-    },
-    {
-      "name": "encoded_check",
-      "class": "boolean",
-      "optional": true,
-      "default": true
-    }
-  ],
-  "outputSpec": [
-    {
-      "name": "outfile",
-      "class": "file"
-    }
-  ],
-  "runSpec": {
-    "interpreter": "python2.7",
-    "file": "src/accession_analysis.py",
-    "distribution": "Ubuntu", "release": "14.04",
-    "execDepends": [
+    "name": "accession_analysis",
+    "title": "Accession analysis",
+    "summary": "accession_analysis",
+    "dxapi": "1.0.0",
+    "version": "0.0.1",
+    "categories": [
+        "ENCODE Analysis Pipeline"
     ],
-    "assetDepends": [
-      {
-        "name": "awscli_asset",
-        "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
-        "version": "0.0.1",
-        "folder": "/ChIP-seq/assets/"
-      },
-      {
-        "name": "common_asset",
-        "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
-        "version": "0.0.1",
-        "folder": "/ChIP-seq/assets/"
-      }
-    ]
-  },
-  "access": {
-    "network": ["*"],
-    "project": "CONTRIBUTE",
-    "allProjects": "CONTRIBUTE"
-  },
-  "authorizedUsers": []
+    "inputSpec": [
+        {
+            "name": "analysis_ids",
+            "class": "array:string",
+            "optional": true
+        },
+        {
+            "name": "infile",
+            "class": "file",
+            "optional": true
+        },
+        {
+            "name": "outfn",
+            "class": "string",
+            "optional": true,
+            "default": "accession_analysis.csv"
+        },
+        {
+            "name": "debug",
+            "class": "boolean",
+            "optional": true,
+            "default": false
+        },
+        {
+            "name": "project",
+            "class": "string",
+            "optional": true
+        },
+        {
+            "name": "pipeline",
+            "class": "string",
+            "optional": true
+        },
+        {
+            "name": "key",
+            "class": "string",
+            "optional": true
+        },
+        {
+            "name": "keyfile",
+            "class": "string",
+            "optional": true,
+            "default": "keypairs.json"
+        },
+        {
+            "name": "dryrun",
+            "class": "boolean",
+            "optional": true,
+            "default": false
+        },
+        {
+            "name": "force_patch",
+            "class": "boolean",
+            "optional": true,
+            "default": false
+        },
+        {
+            "name": "force_upload",
+            "class": "boolean",
+            "optional": true,
+            "default": false
+        },
+        {
+            "name": "use_content_md5sum",
+            "class": "boolean",
+            "optional": true,
+            "default": false
+        },
+        {
+            "name": "fqcheck",
+            "class": "boolean",
+            "optional": true,
+            "default": false
+        },
+        {
+            "name": "accession_raw",
+            "class": "boolean",
+            "optional": true,
+            "default": true
+        },
+        {
+            "name": "signal_only",
+            "class": "boolean",
+            "optional": true,
+            "default": false
+        },
+        {
+            "name": "skip_control",
+            "class": "boolean",
+            "optional": true,
+            "default": false
+        },
+        {
+            "name": "wait_on_files",
+            "class": "array:file",
+            "optional": true
+        },
+        {
+            "name": "encoded_check",
+            "class": "boolean",
+            "optional": true,
+            "default": true
+        }
+    ],
+    "outputSpec": [
+        {
+            "name": "outfile",
+            "class": "file"
+        }
+    ],
+    "runSpec": {
+        "interpreter": "python2.7",
+        "file": "src/accession_analysis.py",
+        "distribution": "Ubuntu",
+        "release": "14.04",
+        "execDepends": [],
+        "assetDepends": [
+            {
+                "name": "awscli_asset",
+                "project": "project-BKp5K980bpZZ096Xp1XQ02fZ",
+                "version": "0.0.1",
+                "folder": "/ChIP-seq/assets/"
+            },
+            {
+                "name": "common_asset",
+                "project": "project-BKp5K980bpZZ096Xp1XQ02fZ",
+                "version": "0.0.1",
+                "folder": "/ChIP-seq/assets/"
+            }
+        ]
+    },
+    "access": {
+        "network": [
+            "*"
+        ],
+        "project": "CONTRIBUTE",
+        "allProjects": "CONTRIBUTE"
+    },
+    "authorizedUsers": []
 }

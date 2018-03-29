@@ -75,10 +75,10 @@
             "optional": false
         },
         {
-            "name": "spp_version",
-            "label": "The version of SPP to use",
-            "class": "string",
-            "default": "1.14"
+          "name": "spp_version",
+          "label": "The version of SPP to use",
+          "class": "string",
+          "default": "1.14"
         },
         {
             "name": "as_file",
@@ -93,13 +93,13 @@
             "optional": true,
             "default": false
         },
-        {
+        {   
             "name": "fragment_length",
             "label": "Use this fragment length instead of the one calculated from xcor",
             "class": "int",
             "optional": true
         },
-        {
+        {   
             "name": "spp_instance",
             "label": "If provided this will over-ride the default instance type for all spp peak-calling jobs",
             "class": "string",
@@ -216,12 +216,11 @@
     "runSpec": {
         "interpreter": "python2.7",
         "file": "src/encode_spp.py",
-        "distribution": "Ubuntu",
-        "release": "14.04",
-        "assetDepends": [
+        "distribution": "Ubuntu", "release": "14.04",
+        "assetDepends":[
             {
                 "name": "common_asset",
-                "project": "project-BKp5K980bpZZ096Xp1XQ02fZ",
+                "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
                 "version": "0.0.1",
                 "folder": "/ChIP-seq/assets/"
             }

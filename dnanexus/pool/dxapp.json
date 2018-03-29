@@ -1,53 +1,56 @@
 {
-  "name": "pool",
-  "title": "ENCODE TF ChIP-seq Pooler",
-  "summary": "Take two gzipped-files and concatenate them into a new gzipped file.",
-  "dxapi": "1.0.0",
-  "version": "0.0.1",
-  "categories": [
-    "ENCODE Analysis Pipeline"
-  ],
-  "inputSpec": [
-    {
-      "name": "inputs",
-      "label": "List of files to concatenate.",
-      "class": "array:file",
-      "optional": false
+    "name": "pool",
+    "title": "ENCODE TF ChIP-seq Pooler",
+    "summary": "Take two gzipped-files and concatenate them into a new gzipped file.",
+    "dxapi": "1.0.0",
+    "version": "0.0.1",
+    "categories": [
+        "ENCODE Analysis Pipeline"
+    ],
+    "inputSpec": [
+        {
+            "name": "inputs",
+            "label": "List of files to concatenate.",
+            "class": "array:file",
+            "optional": false
+        },
+        {
+            "name": "prefix",
+            "label": "Basename for output files",
+            "class": "string",
+            "optional": true
+        }
+    ],
+    "outputSpec": [
+        {
+            "name": "pooled",
+            "label": "Pool of the inputs.",
+            "class": "file"
+        }
+    ],
+    "runSpec": {
+        "interpreter": "python2.7",
+        "file": "src/pool.py",
+        "distribution": "Ubuntu",
+        "release": "14.04",
+        "systemRequirements": {
+            "main": {
+                "instanceType": "mem2_hdd2_x4"
+            }
+        },
+        "assetDepends": [
+            {
+                "name": "common_asset",
+                "project": "project-BKp5K980bpZZ096Xp1XQ02fZ",
+                "version": "0.0.1",
+                "folder": "/ChIP-seq/assets/"
+            }
+        ]
     },
-    {
-      "name": "prefix",
-      "label": "Basename for output files",
-      "class": "string",
-      "optional": true
-    }
-  ],
-  "outputSpec": [
-    {
-      "name": "pooled",
-      "label": "Pool of the inputs.",
-      "class": "file"
-    }
-  ],
-  "runSpec": {
-    "interpreter": "python2.7",
-    "file": "src/pool.py",
-    "distribution": "Ubuntu", "release": "14.04",
-    "systemRequirements": {
-      "main": {"instanceType": "mem2_hdd2_x4"}
+    "access": {
+        "network": [
+            "*"
+        ]
     },
-    "assetDepends":[
-      {
-         "name": "common_asset",
-         "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
-         "version": "0.0.1",
-         "folder": "/ChIP-seq/assets/"
-      } 
-    ]
-  },
-  "access": {
-    "network": [
-      "*"
-    ]
-  },
-  "authorizedUsers": []
+    "authorizedUsers": []
 }

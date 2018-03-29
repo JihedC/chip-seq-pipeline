@@ -1,175 +1,188 @@
 {
-  "name": "filter_qc",
-  "title": "ENCODE TF Chip-seq Mapped Read Filter and QC",
-  "summary": "Take a raw bam file of mapped reads, filter, calculate QC metrics",
-  "dxapi": "1.0.0",
-  "version": "0.0.1",
-  "categories": [
-    "ENCODE Analysis Pipeline"
-  ],
-  "inputSpec": [
-    {
-      "name": "input_bam",
-      "label": "Raw, unfiltered, mapped reads.",
-      "class": "file"
+    "name": "filter_qc",
+    "title": "ENCODE TF Chip-seq Mapped Read Filter and QC",
+    "summary": "Take a raw bam file of mapped reads, filter, calculate QC metrics",
+    "dxapi": "1.0.0",
+    "version": "0.0.1",
+    "categories": [
+        "ENCODE Analysis Pipeline"
+    ],
+    "inputSpec": [
+        {
+            "name": "input_bam",
+            "label": "Raw, unfiltered, mapped reads.",
+            "class": "file"
+        },
+        {
+            "name": "paired_end",
+            "label": "True if the bam was derived from paired-end reads.",
+            "class": "boolean"
+        },
+        {
+            "name": "samtools_params",
+            "label": "Command-line parameters to samtools common to both single- and paired-end data",
+            "class": "string",
+            "optional": true,
+            "default": "-q 30"
+        },
+        {
+            "name": "scrub",
+            "label": "Scrub bam files",
+            "class": "boolean",
+            "optional": true,
+            "default": false
+        },
+        {
+            "name": "debug",
+            "label": "debug mode",
+            "class": "boolean",
+            "optional": true,
+            "default": false
+        }
+    ],
+    "outputSpec": [
+        {
+            "name": "filtered_bam",
+            "label": "Mapped reads surviving the filter.",
+            "class": "file"
+        },
+        {
+            "name": "filtered_bam_index",
+            "label": "Indexed reads surviving the filter.",
+            "class": "file"
+        },
+        {
+            "name": "filtered_mapstats",
+            "label": "Post-filtering mapping statistics.",
+            "class": "file"
+        },
+        {
+            "name": "dup_file_qc",
+            "label": "Duplication metrics from MarkDuplicates.",
+            "class": "file"
+        },
+        {
+            "name": "pbc_file_qc",
+            "label": "Library complexity measures.",
+            "class": "file"
+        },
+        {
+            "name": "paired_end",
+            "label": "True if the bam was derived from paired-end reads.",
+            "class": "boolean"
+        },
+        {
+            "name": "n_reads_input",
+            "label": "Total number of reads in the input",
+            "class": "string"
+        },
+        {
+            "name": "picard_read_pairs_examined",
+            "label": "Number of read pairs passed to picard (PE sequencing)",
+            "class": "string"
+        },
+        {
+            "name": "picard_unpaired_reads_examined",
+            "label": "Number of SE reads passed to picard (SE sequencing)",
+            "class": "string"
+        },
+        {
+            "name": "picard_read_pair_duplicates",
+            "label": "Number of duplicate read pairs from picard (PE sequencing)",
+            "class": "string"
+        },
+        {
+            "name": "picard_unpaired_read_duplicates",
+            "label": "Number of SE duplicate reads from picard (SE sequencing)",
+            "class": "string"
+        },
+        {
+            "name": "useable_fragments",
+            "label": "Number of DNA fragments (SE reads or PE pairs) surviving all filters",
+            "class": "string"
+        },
+        {
+            "name": "NRF",
+            "label": "Non-redundant fraction",
+            "class": "string"
+        },
+        {
+            "name": "PBC1",
+            "label": "PCR Bottleneck Coefficient 1",
+            "class": "string"
+        },
+        {
+            "name": "PBC2",
+            "label": "PCR Bottleneck Coefficient 2",
+            "class": "string"
+        },
+        {
+            "name": "duplicate_fraction",
+            "label": "Picard MarkDuplicates fraction",
+            "class": "string"
+        },
+        {
+            "name": "scrubbed_unfiltered_bam",
+            "label": "Mapped reads scrubbed of sequence information.",
+            "class": "file",
+            "optional": true
+        },
+        {
+            "name": "scrubbed_filtered_bam",
+            "label": "Filtered mapped reads scrubbed of sequence information.",
+            "class": "file",
+            "optional": true
+        }
+    ],
+    "runSpec": {
+        "interpreter": "python2.7",
+        "file": "src/filter_qc.py",
+        "distribution": "Ubuntu",
+        "release": "14.04",
+        "execDepends": [
+            {
+                "name": "samtools",
+                "package_manager": "git",
+                "url": "https://github.com/samtools/samtools.git",
+                "destdir": "/tmp",
+                "tag": "0.1.19",
+                "build_commands": "make samtools && cp /tmp/samtools/samtools /usr/local/bin/samtools"
+            },
+            {
+                "name": "bedtools"
+            },
+            {
+                "name": "ant"
+            },
+            {
+                "name": "openjdk-6-jdk"
+            },
+            {
+                "name": "picard",
+                "package_manager": "git",
+                "url": "https://github.com/broadinstitute/picard.git",
+                "tag": "1.92",
+                "build_commands": "ant -Djava6.home=/usr/lib/jvm/java-6-openjdk-amd64/ -Ddist=/picard -lib lib/ant package-commands"
+            }
+        ],
+        "systemRequirements": {
+            "main": {
+                "instanceType": "mem3_hdd2_x2"
+            }
+        },
+        "assetDepends": [
+            {
+                "name": "common_asset",
+                "project": "project-BKp5K980bpZZ096Xp1XQ02fZ",
+                "version": "0.0.1",
+                "folder": "/ChIP-seq/assets/"
+            }
+        ]
     },
-    {
-      "name": "paired_end",
-      "label": "True if the bam was derived from paired-end reads.",
-      "class": "boolean"
+    "access": {
+        "network": [
+            "*"
+        ]
     },
-    {
-      "name": "samtools_params",
-      "label": "Command-line parameters to samtools common to both single- and paired-end data",
-      "class": "string",
-      "optional": true,
-      "default": "-q 30"
-    },
-    {
-      "name": "scrub",
-      "label": "Scrub bam files",
-      "class": "boolean",
-      "optional": true,
-      "default": false
-    },
-    {
-      "name": "debug",
-      "label": "debug mode",
-      "class": "boolean",
-      "optional": true,
-      "default": false
-    }
-  ],
-  "outputSpec": [
-    {
-      "name": "filtered_bam",
-      "label": "Mapped reads surviving the filter.",
-      "class": "file"
-    },
-    {
-      "name": "filtered_bam_index",
-      "label": "Indexed reads surviving the filter.",
-      "class": "file"
-    },
-    {
-      "name": "filtered_mapstats",
-      "label": "Post-filtering mapping statistics.",
-      "class": "file"
-    },
-    {
-      "name": "dup_file_qc",
-      "label": "Duplication metrics from MarkDuplicates.",
-      "class": "file"
-    },
-    {
-      "name": "pbc_file_qc",
-      "label": "Library complexity measures.",
-      "class": "file"
-    },
-    {
-      "name": "paired_end",
-      "label": "True if the bam was derived from paired-end reads.",
-      "class": "boolean"
-    },
-    {
-      "name": "n_reads_input",
-      "label": "Total number of reads in the input",
-      "class": "string"
-    },
-    {
-      "name": "picard_read_pairs_examined",
-      "label": "Number of read pairs passed to picard (PE sequencing)",
-      "class": "string"
-    },
-    {
-      "name": "picard_unpaired_reads_examined",
-      "label": "Number of SE reads passed to picard (SE sequencing)",
-      "class": "string"
-    },
-    {
-      "name": "picard_read_pair_duplicates",
-      "label": "Number of duplicate read pairs from picard (PE sequencing)",
-      "class": "string"
-    },
-    {
-      "name": "picard_unpaired_read_duplicates",
-      "label": "Number of SE duplicate reads from picard (SE sequencing)",
-      "class": "string"
-    },
-    {
-      "name": "useable_fragments",
-      "label": "Number of DNA fragments (SE reads or PE pairs) surviving all filters",
-      "class": "string"
-    },
-    {
-      "name": "NRF",
-      "label": "Non-redundant fraction",
-      "class": "string"
-    },
-    {
-      "name": "PBC1",
-      "label": "PCR Bottleneck Coefficient 1",
-      "class": "string"
-    },
-    {
-      "name": "PBC2",
-      "label": "PCR Bottleneck Coefficient 2",
-      "class": "string"
-    },
-    {
-      "name": "duplicate_fraction",
-      "label": "Picard MarkDuplicates fraction",
-      "class": "string"
-    },
-    {
-      "name": "scrubbed_unfiltered_bam",
-      "label": "Mapped reads scrubbed of sequence information.",
-      "class": "file",
-      "optional": true
-    },
-    {
-      "name": "scrubbed_filtered_bam",
-      "label": "Filtered mapped reads scrubbed of sequence information.",
-      "class": "file",
-      "optional": true
-    }
-  ],
-  "runSpec": {
-    "interpreter": "python2.7",
-    "file": "src/filter_qc.py",
-    "distribution": "Ubuntu", "release": "14.04",
-    "execDepends": [
-      {"name": "samtools",
-       "package_manager": "git",
-       "url": "https://github.com/samtools/samtools.git",
-       "destdir": "/tmp",
-       "tag": "0.1.19",
-       "build_commands": "make samtools && cp /tmp/samtools/samtools /usr/local/bin/samtools"},
-      {"name": "bedtools"},
-      {"name": "ant"},
-      {"name": "openjdk-6-jdk"},
-      {"name": "picard",
-       "package_manager": "git",
-       "url": "https://github.com/broadinstitute/picard.git",
-       "tag": "1.92",
-       "build_commands": "ant -Djava6.home=/usr/lib/jvm/java-6-openjdk-amd64/ -Ddist=/picard -lib lib/ant package-commands"}
-     ],
-    "systemRequirements": {
-      "main": {"instanceType": "mem3_hdd2_x2"}
-    },
-    "assetDepends": [
-      {
-            "name": "common_asset",
-            "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
-            "version": "0.0.1",
-            "folder": "/ChIP-seq/assets/"
-      }
-    ]
-  },
-  "access": {
-    "network": [
-      "*"
-    ]
-  },
-  "authorizedUsers": []
+    "authorizedUsers": []
 }

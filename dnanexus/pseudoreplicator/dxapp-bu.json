@@ -1,0 +1,58 @@
+{
+  "name": "pseudoreplicator",
+  "title": "ENCODE TF ChIP-seq Pseudoreplicator",
+  "summary": "Take a tagAlign or BEDPE file and generate two pseudoreplicates",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "categories": [
+    "ENCODE Analysis Pipeline"
+  ],
+  "inputSpec": [
+    {
+      "name": "input_tags",
+      "label": "File of mapped reads from which to sample",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "prefix",
+      "label": "Basename for output files",
+      "class": "string",
+      "optional": true
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "pseudoreplicate1",
+      "label": "Pseudoreplicate 1",
+      "class": "file"
+    },
+    {
+      "name": "pseudoreplicate2",
+      "label": "Pseudoreplicate 2",
+      "class": "file"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "python2.7",
+    "file": "src/pseudoreplicator.py",
+    "distribution": "Ubuntu", "release": "14.04",
+    "systemRequirements": {
+      "main":     {"instanceType": "mem3_hdd2_x8"}
+    },
+    "assetDepends":[
+     {
+            "name": "common_asset",
+            "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
+            "version": "0.0.1",
+            "folder": "/ChIP-seq/assets/"
+      }
+    ]
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "authorizedUsers": []
+}

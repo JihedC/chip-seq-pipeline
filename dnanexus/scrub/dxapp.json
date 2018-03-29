@@ -1,53 +1,52 @@
 {
-  "name": "scrub",
-  "title": "ENCODE bam scrubber",
-  "summary": "Removes sequence and PHRED strings from bam files",
-  "dxapi": "1.0.0",
-  "version": "0.0.1",
-  "inputSpec": [
-    {
-      "name": "input_bams",
-      "class": "array:file",
-      "optional": false,
-      "patterns": [
-        "*"
-      ],
-      "help": ""
+    "name": "scrub",
+    "title": "ENCODE bam scrubber",
+    "summary": "Removes sequence and PHRED strings from bam files",
+    "dxapi": "1.0.0",
+    "version": "0.0.1",
+    "inputSpec": [
+        {
+            "name": "input_bams",
+            "class": "array:file",
+            "optional": false,
+            "patterns": [
+                "*"
+            ],
+            "help": ""
+        }
+    ],
+    "outputSpec": [
+        {
+            "name": "scrubbed_bams",
+            "class": "array:file",
+            "patterns": [
+                "*"
+            ],
+            "help": ""
+        }
+    ],
+    "runSpec": {
+        "timeoutPolicy": {
+            "*": {
+                "hours": 48
+            }
+        },
+        "interpreter": "python2.7",
+        "file": "src/scrub.py",
+        "distribution": "Ubuntu",
+        "release": "14.04",
+        "systemRequirements": {
+            "*": {
+                "instanceType": "mem1_ssd2_x2"
+            }
+        },
+        "assetDepends": [
+            {
+                "name": "common_asset",
+                "project": "project-BKp5K980bpZZ096Xp1XQ02fZ",
+                "version": "0.0.1",
+                "folder": "/ChIP-seq/assets/"
+            }
+        ]
     }
-  ],
-  "outputSpec": [
-    {
-      "name": "scrubbed_bams",
-      "class": "array:file",
-      "patterns": [
-        "*"
-      ],
-      "help": ""
-    }
-  ],
-  "runSpec": {
-    "timeoutPolicy": {
-      "*": {
-        "hours": 48
-      }
-    },
-    "interpreter": "python2.7",
-    "file": "src/scrub.py",
-    "distribution": "Ubuntu", "release": "14.04",
-    "systemRequirements": {
-      "*": {
-        "instanceType": "mem1_ssd2_x2"
-      }
-    },
-    "distribution": "Ubuntu",
-    "release": "14.04",
-    "assetDepends": [
-      {
-            "name": "common_asset",
-            "project": "project-BKpvFg00VBPV975PgJ6Q03v6",
-            "version": "0.0.1",
-            "folder": "/ChIP-seq/assets/"
-      }
-    ]
-  }
 }
