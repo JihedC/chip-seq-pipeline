@@ -22,4 +22,3 @@ for applet in ${ACCESSORY_APPLETS[@]}; do
 	# cp common.py $appl/resources/home/dnanexus/common.py
 	dx build --archive --destination "$dest" "$applet/"
 done
-

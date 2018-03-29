@@ -3,8 +3,7 @@
   "title": "Bedtools",
   "description": "Bedtools 2.26 in assetbundle",
   "version": "0.0.1",
-  "distribution": "Ubuntu",
+  "distribution": "Ubuntu", "release": "14.04",
   "instanceType": "mem3_hdd2_x2",
-  "release": "12.04",
   "execDepends": []
 }
