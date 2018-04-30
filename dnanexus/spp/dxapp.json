@@ -105,7 +105,7 @@
         "interpreter": "python2.7",
         "file": "src/spp.py",
         "distribution": "Ubuntu",
-        "release": "14.04",
+        "release": "16.04",
         "systemRequirements": {
             "main": {
                 "instanceType": "mem3_ssd1_x4"

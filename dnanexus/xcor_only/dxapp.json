@@ -63,7 +63,7 @@
         "interpreter": "python2.7",
         "file": "src/xcor_only.py",
         "distribution": "Ubuntu",
-        "release": "14.04",
+        "release": "16.04",
         "systemRequirements": {
             "main": {
                 "instanceType": "mem3_hdd2_x2"

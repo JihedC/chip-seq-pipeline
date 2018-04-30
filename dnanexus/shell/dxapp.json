@@ -18,16 +18,8 @@
         "interpreter": "python2.7",
         "file": "src/shell.py",
         "distribution": "Ubuntu",
-        "release": "14.04",
+        "release": "16.04",
         "execDepends": [
-            {
-                "name": "samtools",
-                "package_manager": "git",
-                "url": "https://github.com/samtools/samtools.git",
-                "destdir": "/tmp",
-                "tag": "0.1.19",
-                "build_commands": "make samtools && cp /tmp/samtools/samtools /usr/local/bin/samtools"
-            }
         ],
         "assetDepends": [
             {
